@@ -31,7 +31,7 @@ export function showChart(series, categories, ytitle, suffix, title, chartType, 
         },
         xAxis: {
             showfirstlabl: true,
-            tickInterval: nums,
+            // tickInterval: nums,
             categories: categories,
             labels: {
                 rotation: 0//调节倾斜角度偏移

@@ -19,11 +19,13 @@
         },
         watch: {
             option(n){
-                console.log(n)
+                // console.log(n)
                 HighCharts.chart(this.id,this.option)
             }
         },
         mounted(){
+            console.log(this.option)
+            console.log(typeof(this.option.series[0]['data'][0]))
             HighCharts.chart(this.id,this.option)
         }
     }
