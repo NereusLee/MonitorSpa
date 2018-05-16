@@ -15,6 +15,7 @@ Vue.config.productionTip = false
 
 Vue.prototype.$showChart = showChart
 Vue.prototype.$axios = axios
+Vue.prototype.$log = console.log
 
 Vue.use(ElementUI)
 
