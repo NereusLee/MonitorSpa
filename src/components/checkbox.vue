@@ -24,7 +24,7 @@
         },
         methods:{
             show(n){
-                console.log(n)
+                console.log(this.$router)
             }
         }
     }
