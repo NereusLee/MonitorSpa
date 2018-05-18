@@ -1,8 +1,8 @@
 // import $ from 'jquery'
-import HighCharts from 'highcharts';
+import Highcharts from 'highcharts';
 
 export function showChart(series, categories, ytitle, suffix, title, chartType, clickcallback, small) {
-    HighCharts.setOptions({
+    Highcharts.setOptions({
         // 所有语言文字相关配置都设置在 lang 里
         lang: {
             resetZoom: '重置',
@@ -16,7 +16,7 @@ export function showChart(series, categories, ytitle, suffix, title, chartType, 
         var nums = Math.floor(categories.length / 24);
     }
 
-    // HighCharts.chart(id,);
+    // Highcharts.chart(id,);
     // return {
     //     chart: {
     //         borderColor:'#fff',

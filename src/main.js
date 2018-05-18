@@ -8,8 +8,18 @@ import bootstrap from 'bootstrap'
 import {showChart} from './js/chart'
 import axios from 'axios'
 import store from './vuex'
-import ElementUI from 'element-ui'
+// import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
+import 'iview/dist/styles/iview.css'
+import {Row,Col,DatePicker,Button,Tooltip} from 'element-ui'
+
+
+Vue.prototype.$ELEMENT = { size: 'small' }
+Vue.use(Row)
+Vue.use(Col)
+Vue.use(Button)
+Vue.use(DatePicker)
+Vue.use(Tooltip)
 
 Vue.config.productionTip = false
 
@@ -17,7 +27,7 @@ Vue.prototype.$showChart = showChart
 Vue.prototype.$axios = axios
 Vue.prototype.$log = console.log
 
-Vue.use(ElementUI)
+// Vue.use(ElementUI)
 
 
 new Vue({

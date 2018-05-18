@@ -19,7 +19,7 @@ export default new Router({
       component: Test
     },
    {
-       path: '/monitor',
+       path: '/monitor/:type',
        name: 'monitor',
        component: monitor
    },

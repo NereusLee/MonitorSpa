@@ -17,6 +17,17 @@ function GetDateStr(AddDayCount) {
     return '' + y + m + d;
 }
 
+function randomString(len) {   //随机生成字符串
+    len = len || 32;
+    var $chars = 'abcdefhijkmnprstwxyz2345678';  /****默认去掉了容易混淆的字符oOLl,9gq,Vv,Uu,I1****/
+    var maxPos = $chars.length;
+    var pwd = '';
+    for (let i = 0; i < len; i++) {
+        pwd += $chars.charAt(Math.floor(Math.random() * maxPos));
+    }
+    return pwd;
+}
+
 export default new Vuex.Store({
     state: {
         startingMode: [], //启动方式的数据
@@ -42,7 +53,8 @@ export default new Vuex.Store({
                 'cnName': '视频UV',
                 series: []
             }
-        ]
+        ],
+        monitorData:[]
     },
     mutations: {
         changeStartingMdoe(state, res) {  //接入方式接口数据
@@ -151,6 +163,39 @@ export default new Vuex.Store({
                     })
                 }
             }
+        },
+        changeMonitorData(state,v){
+            log(v,v.length)
+            for(let kk in v){
+                console.log(v[kk])
+            }
+            for(let i=0;i<v.length;i++){
+                log(state.monitorData)
+
+                state.monitorData.push({
+                    id: randomString(4),
+                    option: showChart(
+                        v[i].data.data,
+                        v[i].data.categories,
+                        '', '',
+                        '',
+                        'line',
+                        '', ''
+                    ),
+                    describe:`视图ID为${v[i].mixid},属性ID为${v[i].attrid}`
+                })
+            }
+            // state.MonitorData.push({
+            //     id: value.id,
+            //     option: showChart(
+            //         v.data,
+            //         v.categories,
+            //         '', '',
+            //         '',
+            //         'line',
+            //         '', ''
+            //     )
+            // })
         }
     },
     actions: {
@@ -184,10 +229,28 @@ export default new Vuex.Store({
                 context.commit('changeChannelsData', data)
             })
         },
-        getMonitorData(context) {
-            axios('https://api.myjson.com/bins/q8rni').then(res => {
-                log(res)
-            })
+        getMonitorData(context,{mixid,attrid,title}) {
+            var chartArr = []
+            for(let i=0;i<title.length;i++){
+                // axios.post('http://test.lg.webdev.com/accesslayer/NewsMonitorAccesslayer/GetThreeDailyData',
+                //     qs.stringify({
+                //         type:1,
+                //         mixid,
+                //         attrid:attrid[i]
+                //     })
+                axios('https://api.myjson.com/bins/q8rni').then(res=>{
+                    let obj = 123
+                    // obj = {
+                    //     title:title[i],
+                    //     data:res.data,
+                    //     mixid,
+                    //     attrid:attrid[i]
+                    // }
+                    chartArr[i]=obj
+                })
+            }
+            log(chartArr[2])
+            context.commit('changeMonitorData',chartArr)
         }
     }
 })

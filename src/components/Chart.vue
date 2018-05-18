@@ -11,7 +11,7 @@
     </div>
 </template>
 <script>
-    import HighCharts from 'highcharts'
+    import Highcharts from 'highcharts'
 
     export default {
         // 验证类型
@@ -37,12 +37,12 @@
         watch: {
             option(n) {
                 // console.log(n)
-                HighCharts.chart(this.id, this.option)
+                Highcharts.chart(this.id, this.option)
             }
         },
         mounted() {
             // console.log(typeof(this.option.series[0]['data'][0]))
-            HighCharts.chart(this.id, this.option)
+            Highcharts.chart(this.id, this.option)
         }
     }
 </script>

@@ -2,8 +2,9 @@
   <div id="app">
     <router-link to='/test'>go to test</router-link><br />
     <router-link to='/hello/startStyle'>StartStyle</router-link>
-    <router-link to='/hello/channel'>Channel</router-link>
-    <router-link to='/monitor'>go to monitor</router-link><br />
+    <router-link to='/hello/channel'>Channel</router-link><br />
+    <router-link to='/monitor/news'>monitor news</router-link>
+    <router-link to='/monitor/kuaibao'>monitor kuaibao</router-link><br />
     <router-view></router-view>
   </div>
 </template>

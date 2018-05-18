@@ -24,7 +24,6 @@
     import chart from '@/components/Chart.vue'
     import checkBox from '@/components/checkbox.vue'
     import QueryCondition from '@/plug/QueryCondition'
-
     export default {
         name: 'app',
         data() {
@@ -52,12 +51,12 @@
         watch: {
             StartingMode(n) {
                 log(n)
-                // sessionStorage.setItem('style', JSON.stringify(this.startingMode))
+                sessionStorage.setItem('style', JSON.stringify(this.startingMode)) //用sessionStorage存储避免重复ajax请求
                 this.list = this.startingMode
             },
             ChannelsData(n) {
                 log(n)
-                // sessionStorage.setItem('channel', JSON.stringify(this.channelsData))
+                sessionStorage.setItem('channel', JSON.stringify(this.channelsData))
                 this.list = this.channelsData
             },
             $route(m) {
