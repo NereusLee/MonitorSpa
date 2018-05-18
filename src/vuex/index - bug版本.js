@@ -230,18 +230,12 @@ export default new Vuex.Store({
                 context.commit('changeChannelsData', data)
             })
         },
-        async getMonitorData(context,{mixid,attrid,title}) { //监视器数据
+        getMonitorData(context,{mixid,attrid,title}) { //监视器数据
             var chartArr = []
             let v = 0
             for(let i=0;i<title.length;i++){
-                // axios.post('http://test.lg.webdev.com/accesslayer/NewsMonitorAccesslayer/GetThreeDailyData',
-                //     qs.stringify({
-                //         type:1,
-                //         mixid,
-                //         attrid:attrid[i]
-                //     })
-               let res = await axios('https://api.myjson.com/bins/q8rni')
-                   let obj = {
+              axios('https://api.myjson.com/bins/q8rni').then(res=>{ 
+                let obj = {
                         title:title[0],
                         data:res.data,
                         mixid,
@@ -249,7 +243,8 @@ export default new Vuex.Store({
                     }
                     log(obj)
                     chartArr.push(obj)
-
+              })
+                   log(chartArr)  //此时的chartArr无长度,不能选中子元素
             }
             let all = Array.prototype.slice.call(chartArr)
                 log(typeof chartArr)

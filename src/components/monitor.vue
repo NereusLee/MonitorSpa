@@ -52,12 +52,12 @@
                 return this.monitorData
             }
         },
-        watch:{
-          list(n){
-              log(n)
-              this.getData()
-            }
-        },
+        // watch:{
+        //   list(n){
+        //       log(n)
+        //       this.getData()
+        //     }
+        // },
         methods:{
             ...mapActions(['getMonitorData']),
             getData(){
