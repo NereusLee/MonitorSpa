@@ -31,6 +31,7 @@ function randomString(len) {   //随机生成字符串
 
 export default new Vuex.Store({
     state: {
+        loading:false,  //加载动画
         startingMode: [], //启动方式的数据
         channels: `news_news_top,news_news_ent,news_news_finance,news_news_sports,news_news_tech,news_topic`,
         channelsData: [],
@@ -58,8 +59,11 @@ export default new Vuex.Store({
         monitorData:[]
     },
     mutations: {
+        changeLoading(state){
+            state.loading = !state.loading
+        },
         changeStartingMdoe(state, res) {  //接入方式接口数据
-            // console.log(v)
+            console.log(res)
             let firstTitle = []
             let sm = res.data
             let categories = res.categories.map(item => { //时间,横坐标
@@ -91,6 +95,8 @@ export default new Vuex.Store({
                 index++
             }
             state.startingMode = firstTitle
+            log(firstTitle)
+            state.loading = false //加载动画取消
         },
         changeChannelsData(state, v) {  //频道接口数据
             for (let value of state.opt) {
@@ -164,28 +170,31 @@ export default new Vuex.Store({
                     })
                 }
             }
+            state.loading = false
         },
         changeMonitorData(state,v){
-            log(v,v.length)
-            for(let kk in v){
-                console.log(v[kk])
-            }
+            state.monitorData = []
             for(let i=0;i<v.length;i++){
-                log(state.monitorData)
-
-                state.monitorData.push({
-                    id: randomString(4),
-                    option: showChart(
-                        v[i].data.data,
-                        v[i].data.categories,
-                        '', '',
-                        '',
-                        'line',
-                        '', ''
-                    ),
-                    describe:`视图ID为${v[i].mixid},属性ID为${v[i].attrid}`
-                })
+                if(v[i].data){
+                    let series = v[i].data.data
+                    let categories = v[i].data.categories
+                    state.monitorData.push({
+                        id: randomString(4),
+                        option: showChart(
+                            series,
+                            categories,
+                            '', '',
+                            v[i].title,
+                            'line',
+                            '', ''
+                        ),
+                        describe:`视图ID为${v[i].mixid},属性ID为${v[i].attrid}`
+                    })
+                }
             }
+            state.loading = false //加载动画取消
+            // log(state.monitorData)
+
             // state.MonitorData.push({
             //     id: value.id,
             //     option: showChart(
@@ -201,6 +210,7 @@ export default new Vuex.Store({
     },
     actions: {
         getStartingMode(context, date) { //获取启动方式分组的数据
+            context.commit('changeLoading') //加载动画
             //   let arg = arguments[1]||[GetDateStr(-5),GetDateStr(0)]
             // axios.post('http://test.lg.webdev.com/appnews/NewsdailyPVUV/GetSimgleTrendChart',
             //     qs.stringify(
@@ -215,6 +225,7 @@ export default new Vuex.Store({
             })
         },
         getChannelsData(context) { //获取按频道分组的数据
+            context.commit('changeLoading')
             // let seDate = [GetDateStr(-5),GetDateStr(0)]
             //   let arg = arguments[1]||{date:seDate ,channel:`news_news_top,news_news_ent,news_news_finance,news_news_sports,news_news_tech,news_topic`}
             //   console.log(arg.date[0])
@@ -230,30 +241,31 @@ export default new Vuex.Store({
                 context.commit('changeChannelsData', data)
             })
         },
-        async getMonitorData(context,{mixid,attrid,title}) { //监视器数据
+        async getMonitorData(context,{mixid,list}) { //监视器数据
+            context.commit('changeLoading')
             var chartArr = []
-            let v = 0
-            for(let i=0;i<title.length;i++){
-                // axios.post('http://test.lg.webdev.com/accesslayer/NewsMonitorAccesslayer/GetThreeDailyData',
-                //     qs.stringify({
-                //         type:1,
-                //         mixid,
-                //         attrid:attrid[i]
-                //     })
-               let res = await axios('https://api.myjson.com/bins/q8rni')
-                   let obj = {
-                        title:title[0],
+                for(let i=0;i<list.length;i++){
+                    // axios.post('http://test.lg.webdev.com/accesslayer/NewsMonitorAccesslayer/GetThreeDailyData',
+                    //     qs.stringify({
+                    //         type:1,
+                    //         mixid,
+                    //         attrid:list[i].attrid
+                    //     })
+                    let res
+                    try{
+                        res = await axios('https://api.myjson.com/bins/q8rni')
+                    }catch (e) {
+                       res = {}
+                    }
+                    let obj = {
+                        title:list[i].title,
                         data:res.data,
                         mixid,
-                        attrid:attrid[0]
+                        attrid:list[i].attrid
                     }
-                    log(obj)
                     chartArr.push(obj)
-
-            }
-            let all = Array.prototype.slice.call(chartArr)
-                log(typeof chartArr)
-            context.commit('changeMonitorData',chartArr.slice())
+                }
+                context.commit('changeMonitorData',chartArr)
         }
     }
 })

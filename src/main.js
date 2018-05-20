@@ -11,7 +11,7 @@ import store from './vuex'
 // import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import 'iview/dist/styles/iview.css'
-import {Row,Col,DatePicker,Button,Tooltip} from 'element-ui'
+import {Row,Col,DatePicker,Button,Tooltip,Option,Select} from 'element-ui'
 
 
 Vue.prototype.$ELEMENT = { size: 'small' }
@@ -20,6 +20,8 @@ Vue.use(Col)
 Vue.use(Button)
 Vue.use(DatePicker)
 Vue.use(Tooltip)
+Vue.use(Option)
+Vue.use(Select)
 
 Vue.config.productionTip = false
 

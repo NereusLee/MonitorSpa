@@ -32,13 +32,14 @@
 
 <script>
     import {mapState, mapActions} from 'vuex'
-
     const log = console.log.bind(this)
     export default {
         props: {
             rou: {
                 type: String
             }
+        },
+        components:{
         },
         data() {
             return {
