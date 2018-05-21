@@ -5,7 +5,7 @@
                 {{title}}
                 <!--介绍文字和图标-->
                 <el-tooltip class="item" effect="light" :content="describe" placement="right-start">
-                    <el-button class='el-but'><i class="iconfont">&#xe735;</i></el-button>
+                    <el-button class='el-but'><Icon type="information-circled"></Icon></el-button>
                 </el-tooltip>
             </div>
         </div>
@@ -15,7 +15,8 @@
     </div>
 </template>
 <script>
-    // import Highcharts from 'highcharts'
+    import Highcharts from 'highcharts'
+    import {Icon} from 'iview'
 
     export default {
         // 验证类型
@@ -29,6 +30,9 @@
             describe: {
                 type: String
             }
+        },
+        components:{
+          Icon
         },
         data() {
             return {
@@ -74,13 +78,13 @@
         display: inline;
         position: absolute;
         top: 50%;
-        left: 50%;
+        left: 56%;
         transform: translate(-50%, -50%);
         font-size: 15px;
     }
     .el-button {
         border: none;
-        .iconfont {
+        .ivu-icon {
             color: rgb(245, 181, 58);
         }
         .el-tooltip__popper is-light {

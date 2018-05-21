@@ -89,13 +89,9 @@ export default new Vuex.Store({
                     let res
                     let url = `http://yd.lg.webdev.com/accesslayer/NewsMonitorAccesslayer/GetThreeDailyData?type=1&mixid=${list[i].mixid}&attrid=${list[i].attrid}`
                     try{
-                       res=await axios(url)
-                       //  let res =await $.ajax({
-                       //      type:'get',
-                       //      url:url,
-                       //      dataType:'jsonp'
-                       //  })
-                       //  res = await axios('https://api.myjson.com/bins/q8rni')
+                       // res=await axios(url)
+
+                        res = await axios('https://api.myjson.com/bins/q8rni')
                     }catch (e) {
                        res = {}
                     }
@@ -244,7 +240,8 @@ export default new Vuex.Store({
                             '', '',
                             v[i].title,
                             'line',
-                            '', ''
+                            '',
+                            1  //是否加辅助线
                         ),
                         // state.monitorData.push({
                         // id: value.id,
