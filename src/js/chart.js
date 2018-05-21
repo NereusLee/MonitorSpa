@@ -1,5 +1,5 @@
 // import $ from 'jquery'
-import Highcharts from 'highcharts';
+// import Highcharts from 'highcharts';
 
 export function showChart(series, categories, ytitle, suffix, title, chartType, clickcallback, small) {
     Highcharts.setOptions({
@@ -9,12 +9,6 @@ export function showChart(series, categories, ytitle, suffix, title, chartType, 
             resetZoomTitle: '重置缩放比例'
         }
     });
-
-    if (small == 'small') {
-        var nums = Math.floor(categories.length / 5);
-    } else {
-        var nums = Math.floor(categories.length / 24);
-    }
 
     return {
         title:title,

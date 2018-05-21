@@ -16,7 +16,6 @@
                 v-if="this.rou=='channel'"
                 v-model="channels" multiple
                 placeholder="请选择频道"
-                @change="pick"
                 size="small"
         >
         <el-option
@@ -31,7 +30,7 @@
 </template>
 
 <script>
-    import {mapState, mapActions} from 'vuex'
+    import {mapState, mapActions,mapMutations} from 'vuex'
     const log = console.log.bind(this)
     export default {
         props: {
@@ -45,10 +44,10 @@
             return {
                 options: [{
                     value: '选项1',
-                    label: 'nwef'
+                    label: 'news_news_sports'
                 }, {
                     value: '选项2',
-                    label: 'ghmn'
+                    label: 'news_news_top'
                 }, {
                     value: '选项3',
                     label: '蚵仔煎'
@@ -67,20 +66,29 @@
                 }
             }
         },
+        computed:{
+            ...mapState(['myChannels']),
+            // myCN(){
+            //     return this.myChannels
+            // }
+        },
         created() {
             // log(this.rou)
         },
         methods: {
             ...mapActions(['getStartingMode', 'getChannelsData']),
+            ...mapMutations(['changeMyChannels']),
             search() {
                 this.but.loading = true
                 log(typeof (this.channels.join(',')))
-                let goSearch = this.rou == 'startStyle' ? this.getChannelsData(this.seDate) : this.getChannelsData({date:this.seDate, channel:this.channels.join(',')})
+                if(this.rou == 'channel'){
+                    this.changeMyChannels(this.channels.join(','))
+                }
+                console.log(this.myChannels)
+                let goSearch = this.rou == 'startStyle' ? this.getStartingMode(this.seDate) : this.getChannelsData({date:this.seDate, channel:this.channels.join(',')})
                 goSearch.then(() => {
                     this.but.loading = false
                 })
-            },
-            pick(){
             }
         }
     };

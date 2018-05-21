@@ -33,43 +33,97 @@ export default new Vuex.Store({
     state: {
         loading:false,  //加载动画
         startingMode: [], //启动方式的数据
-        channels: `news_news_top,news_news_ent,news_news_finance,news_news_sports,news_news_tech,news_topic`,
+        myChannels: `news_news_top,news_news_ent,news_news_finance,news_news_sports,news_news_tech,news_topic`,
         channelsData: [],
-        opt: [{
-            'id': 'articlepv',
-            cnName: '图文PV',
-            series: []
-        },
+        opt: [
             {
-                'id': 'articleuv',
-                'cnName': '图文UV',
+                id: 'articlepv',
+                cnName: '图文PV',
                 series: []
             },
             {
-                'id': 'videovv',
-                'cnName': '视频PV',
+                id: 'articleuv',
+                cnName: '图文UV',
                 series: []
             },
             {
-                'id': 'videouv',
-                'cnName': '视频UV',
+                id: 'videouv',
+                cnName: '视频UV',
+                series: []
+            },
+            {
+                id: 'videovv',
+                cnName: '视频PV',
                 series: []
             }
         ],
         monitorData:[]
     },
+    actions: {
+        getStartingMode(context, date) { //获取启动方式分组的数据
+            context.commit('changeLoading') //加载动画
+              let arg = arguments[1]||[GetDateStr(-5),GetDateStr(0)]
+            let url = `http://yd.lg.webdev.com/accesslayer/NewsdailyPVUV/GetSimgleTrendChart?sdate=${arg[0]}&edate=${arg[1]}`
+            axios(url).then(dat => {
+                let res = dat.data
+                context.commit('changeStartingMdoe', res)
+            })
+            //axios('https://api.myjson.com/bins/zwdji')
+        },
+        async getChannelsData(context,{date,channel}) { //获取按频道分组的数据
+            context.commit('changeLoading')
+            // let seDate = [GetDateStr(-5),GetDateStr(0)]
+            let arg = arguments[1]
+              // console.log(arg.date[0])
+            let url = `http://yd.lg.webdev.com/accesslayer/NewsdailyPVUV/GetChanelPvUvData?sdate=${arg.date[0]}&edate=${arg.date[1]}&channels=${arg.channel}`
+            let data = await axios(url)
+            context.commit('changeChannelsData', data)
+                //axios('https://api.myjson.com/bins/150pce')
+        },
+        async getMonitorData(context,list) { //监视器数据
+
+            context.commit('changeLoading')
+            var chartArr = []
+                for(let i=0;i<list.length;i++){
+
+                    let res
+                    let url = `http://yd.lg.webdev.com/accesslayer/NewsMonitorAccesslayer/GetThreeDailyData?type=1&mixid=${list[i].mixid}&attrid=${list[i].attrid}`
+                    try{
+                       res=await axios(url)
+                       //  let res =await $.ajax({
+                       //      type:'get',
+                       //      url:url,
+                       //      dataType:'jsonp'
+                       //  })
+                       //  res = await axios('https://api.myjson.com/bins/q8rni')
+                    }catch (e) {
+                       res = {}
+                    }
+                    let obj = {
+                        title:list[i].title,
+                        data:res.data,
+                        mixid:list[i].mixid,
+                        attrid:list[i].attrid
+                    }
+                    chartArr.push(obj)
+                }
+                context.commit('changeMonitorData',chartArr)
+        }
+    },
     mutations: {
         changeLoading(state){
             state.loading = !state.loading
         },
+        changeMyChannels(state,v){
+          state.myChannels = v
+        },
         changeStartingMdoe(state, res) {  //接入方式接口数据
-            console.log(res)
             let firstTitle = []
             let sm = res.data
             let categories = res.categories.map(item => { //时间,横坐标
                 return `${item.slice(4, 6).match(/[1-9]+/)[0]}月${item.slice(6)}日`
             })
-            let cnName = ['图文PV', '图文UV', '视频PV', '视频UV']
+            let cnName = ['图文PV', '图文UV', '视频UV', '视频PV']
             let index = 0;
             for (let k1 in sm) {
                 let series = []
@@ -95,10 +149,11 @@ export default new Vuex.Store({
                 index++
             }
             state.startingMode = firstTitle
-            log(firstTitle)
+            // log(firstTitle)
             state.loading = false //加载动画取消
         },
         changeChannelsData(state, v) {  //频道接口数据
+            log(state.myChannels)
             for (let value of state.opt) {
                 value.series = []
             }
@@ -106,12 +161,12 @@ export default new Vuex.Store({
             let canvas = { //四个图表
                 'articlepv': {},
                 'articleuv': {},
-                'videovv': {},
-                'videouv': {}
+                'videouv': {},
+                'videovv': {}
             }
 
 
-            let CN = state.channels.split(',') //各个频道的名字
+            let CN = state.myChannels.split(',') //各个频道的名字
 
             for (let key in canvas) {
                 for (let value of CN) {
@@ -119,6 +174,7 @@ export default new Vuex.Store({
                     canvas[key][value] = {}
                 }
             }
+
             let categories = res[CN[0]]['categories'].map(item => { //时间,横坐标
                 return `${item.slice(4, 6).match(/[1-9]+/)[0]}月${item.slice(6)}日`
             })
@@ -140,10 +196,10 @@ export default new Vuex.Store({
                     case 'articleuv':
                         index = 1;
                         break;
-                    case 'videovv':
+                    case 'videouv':
                         index = 2;
                         break;
-                    case 'videouv':
+                    case 'videovv':
                         index = 3;
                         break;
                 }
@@ -155,6 +211,7 @@ export default new Vuex.Store({
                 }
             }
             // console.log(state.opt)
+            state.channelsData = []
             if (state.channelsData.length == 0) {
                 for (let value of state.opt) {
                     state.channelsData.push({
@@ -170,6 +227,7 @@ export default new Vuex.Store({
                     })
                 }
             }
+            log(state.channelsData)
             state.loading = false
         },
         changeMonitorData(state,v){
@@ -188,6 +246,17 @@ export default new Vuex.Store({
                             'line',
                             '', ''
                         ),
+                        // state.monitorData.push({
+                        // id: value.id,
+                        // option: showChart(
+                        //     v.data,
+                        //     v.categories,
+                        //     '', '',
+                        //     '',
+                        //     'line',
+                        //     '', ''
+                        // )
+                    // }),
                         describe:`视图ID为${v[i].mixid},属性ID为${v[i].attrid}`
                     })
                 }
@@ -195,77 +264,7 @@ export default new Vuex.Store({
             state.loading = false //加载动画取消
             // log(state.monitorData)
 
-            // state.MonitorData.push({
-            //     id: value.id,
-            //     option: showChart(
-            //         v.data,
-            //         v.categories,
-            //         '', '',
-            //         '',
-            //         'line',
-            //         '', ''
-            //     )
-            // })
-        }
-    },
-    actions: {
-        getStartingMode(context, date) { //获取启动方式分组的数据
-            context.commit('changeLoading') //加载动画
-            //   let arg = arguments[1]||[GetDateStr(-5),GetDateStr(0)]
-            // axios.post('http://test.lg.webdev.com/appnews/NewsdailyPVUV/GetSimgleTrendChart',
-            //     qs.stringify(
-            //        {
-            //            sdate:arg[0],
-            //            edate:arg[1],
-            //        })
-            axios('https://api.myjson.com/bins/zwdji').then(dat => {
-                let res = dat.data
 
-                context.commit('changeStartingMdoe', res)
-            })
-        },
-        getChannelsData(context) { //获取按频道分组的数据
-            context.commit('changeLoading')
-            // let seDate = [GetDateStr(-5),GetDateStr(0)]
-            //   let arg = arguments[1]||{date:seDate ,channel:`news_news_top,news_news_ent,news_news_finance,news_news_sports,news_news_tech,news_topic`}
-            //   console.log(arg.date[0])
-            // axios.post('http://test.lg.webdev.com/appnews/NewsdailyPVUV/GetChanelPvUvData',
-            //     qs.stringify(
-            //          {
-            //          sdate:arg.date[0],
-            //          edate:arg.date[1],
-            //          channels:arg.channel
-            //      })
-            axios('https://api.myjson.com/bins/150pce').then(data => {
-                console.log(data)
-                context.commit('changeChannelsData', data)
-            })
-        },
-        async getMonitorData(context,{mixid,list}) { //监视器数据
-            context.commit('changeLoading')
-            var chartArr = []
-                for(let i=0;i<list.length;i++){
-                    // axios.post('http://test.lg.webdev.com/accesslayer/NewsMonitorAccesslayer/GetThreeDailyData',
-                    //     qs.stringify({
-                    //         type:1,
-                    //         mixid,
-                    //         attrid:list[i].attrid
-                    //     })
-                    let res
-                    try{
-                        res = await axios('https://api.myjson.com/bins/q8rni')
-                    }catch (e) {
-                       res = {}
-                    }
-                    let obj = {
-                        title:list[i].title,
-                        data:res.data,
-                        mixid,
-                        attrid:list[i].attrid
-                    }
-                    chartArr.push(obj)
-                }
-                context.commit('changeMonitorData',chartArr)
         }
     }
 })

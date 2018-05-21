@@ -1,27 +1,27 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import HelloWorld from '@/components/main'
-import Test from '@/components/test'
+import pvuv from '@/components/pvuv'
 import monitor from '@/components/monitor'
+import test from '@/components/test'
 
 Vue.use(Router)
 
 export default new Router({
   routes: [
     {
-      path: '/hello/:id',
-      name: 'main',
-      component: HelloWorld
-    },
-    {
-      path: '/test',
-      name: 'test',
-      component: Test
+      path: '/pvuv/:id',
+      name: 'pvuv',
+      component: pvuv
     },
    {
        path: '/monitor/:type',
        name: 'monitor',
        component: monitor
+   },
+   {
+       path: '/test',
+       name: 'test',
+       component: test
    },
   ]
 })

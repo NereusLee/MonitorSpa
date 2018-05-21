@@ -1,6 +1,6 @@
 <template>
     <Menu :theme="theme" active-name="1" @on-select="select" :style="myStyle">
-        <MenuGroup title="内容管理">
+        <MenuGroup title="关键指标监控">
             <MenuItem v-for="(x,index) in menuList" :key="index" :name="index" >
                 <Icon type="document-text"></Icon>
                 {{x}}

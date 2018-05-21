@@ -19,9 +19,6 @@ export default {
   computed:{
       ...mapState(['loading'])
   },
-  created(){
-      console.log(this.loading)
-  }
 }
 </script>
 

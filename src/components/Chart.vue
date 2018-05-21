@@ -15,7 +15,7 @@
     </div>
 </template>
 <script>
-    import Highcharts from 'highcharts'
+    // import Highcharts from 'highcharts'
 
     export default {
         // 验证类型
@@ -32,26 +32,28 @@
         },
         data() {
             return {
-                // name:['图文PV', '图文UV', '视频PV', '视频UV'],
                 title: ''
             }
         },
         watch: {
             option(n) {
                 this.title = this.option.title
-                Highcharts.chart(this.id, this.option.option)
+                // this.$nextTick(()=>{
+                    Highcharts.chart(this.id, this.option.option)
+                // })
             }
         },
-        mounted() {
-            // console.log(typeof(this.option.series[0]['data'][0]))
-            Highcharts.chart(this.id, this.option)
-        },
+        // mounted() {
+        //     // console.log(typeof(this.option.series[0]['data'][0]))
+        //     Highcharts.chart(this.id, this.option)
+        // },
         created() {
-            console.log(this.id)
+            // console.log(this.id)
             this.title = this.option.title
             this.$nextTick(() => {
                 Highcharts.chart(this.id, this.option.option)
             })
+
         }
     }
 </script>
