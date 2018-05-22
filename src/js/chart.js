@@ -70,7 +70,7 @@ export function showChart(series, categories, ytitle, suffix, title, chartType, 
                     comparison(this.points[0].y,this.points[2].y)  //上周
                 ]
                 // console.log($(this),$(this).parent('.x-bar'))
-                sessionStorage.setItem('comparison',JSON.stringify(arr))
+                sessionStorage.setItem(title,JSON.stringify(arr))
                 return s;
             },
             useHTML: true

@@ -29,6 +29,26 @@ function randomString(len) {   //随机生成字符串
     return pwd;
 }
 
+// function now(){  //获取当前时间前五分钟
+//   let myDate = new Date()
+//   let hour = myDate.getHours()
+//   let min = myDate.getMinutes()
+//   if(min<5){
+//     return `${(hour-1)}:${min+55}`
+//   }
+//   return `${hour}:${min-5}`
+// }
+
+function getDataNow(num){  //拿到当前时间在后台数据中对应的序号
+  let myDate = new Date()
+  let hour = myDate.getHours()
+  let min = myDate.getMinutes()
+  if(min<num){
+    return (hour-1)*60+min+60-num
+  }
+  return hour*60+min-num
+}
+
 export default new Vuex.Store({
     state: {
         loading:false,  //加载动画
@@ -57,7 +77,8 @@ export default new Vuex.Store({
                 series: []
             }
         ],
-        monitorData:[]
+        monitorData:[],
+        compareData:{}
     },
     actions: {
         getStartingMode(context, date) { //获取启动方式分组的数据
@@ -84,6 +105,8 @@ export default new Vuex.Store({
 
             context.commit('changeLoading')
             var chartArr = []
+            let index = getDataNow(5)
+          log(index)
                 for(let i=0;i<list.length;i++){
 
                     let res
@@ -102,11 +125,26 @@ export default new Vuex.Store({
                         attrid:list[i].attrid
                     }
                     chartArr.push(obj)
+
+                    let array=[]  //存放当前时间的值
+                    log(index)
+                    log(res.data.data[0].data[index])
+                    let timeData = res.data.data.forEach((value,num)=>{
+                      array[num]=value.data[index]
+                    })
+                  log(array)
+                    context.commit('changeCompareData',{
+                      id:`视图ID为${list[i].mixid},属性ID为${list[i].attrid}`,
+                      data:array
+                    })
                 }
                 context.commit('changeMonitorData',chartArr)
         }
     },
     mutations: {
+        changeCompareData(state,v){
+          state.compareData[v.id] = v.data
+        },
         changeLoading(state){
             state.loading = !state.loading
         },
@@ -234,15 +272,12 @@ export default new Vuex.Store({
                     let categories = v[i].data.categories
                     state.monitorData.push({
                         id: randomString(4),
-                        option: showChart(
+                        option: {
                             series,
                             categories,
-                            '', '',
-                            v[i].title,
-                            'line',
-                            '',
-                            1  //是否加辅助线
-                        ),
+                            title:v[i].title,
+                            type:'line',
+                        },
                         // state.monitorData.push({
                         // id: value.id,
                         // option: showChart(

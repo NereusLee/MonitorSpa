@@ -3,11 +3,13 @@
         <myMenu :theme="theme" :menuList="menuList" @switchCarts="switchCarts" :myStyle="{width:'240px'}"></myMenu>
         <!--<el-row>-->
             <ul class="charts">
+              <el-row :gutter="100">
                 <el-col :span="12" v-for="(x,index) in list" :key="x.id">
-                    <li>
-                        <chart :id="x.id" :option="x.option" :describe="x.describe"></chart>
-                    </li>
+                  <li>
+                    <chart2 :id="x.id" :option="x.option" :describe="x.describe"></chart2>
+                  </li>
                 </el-col>
+              </el-row>
             </ul>
         <!--</el-row>-->
     </div>
@@ -16,13 +18,13 @@
 <script>
     const log = console.log.bind(this)
     import {mapActions,mapState} from 'vuex'
-    import chart from '@/components/Chart'
+    import chart2 from '@/plug/Chart2'
     import myMenu from '@/plug/myMenu'
     import {Button} from 'iview'
     export default {
         name: "monitor",
         components:{
-            chart,Button,myMenu
+            Button,myMenu,chart2
         },
         data(){
             return {
@@ -103,10 +105,17 @@
             height: 100%;
             box-sizing: border-box;
             flex:1;
-            overflow: auto;
+            /*overflow: auto;*/
             min-height: 968px;
             margin-top: 35px;
+            el-row{
+              height: 100%;
+              width: 100%;
+            }
             li{
+              min-width: 100px;
+              max-height: 380px;
+              margin-bottom: 80px;
                 /*float:left;*/
             }
         }
