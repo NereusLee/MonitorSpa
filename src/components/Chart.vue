@@ -1,5 +1,5 @@
 <template>
-  <div :option="option">
+  <div class="chart-body" :option="option">
     <div class="chart-head">
       <!--介绍文字和图标-->
         <el-tooltip class="item" effect="light" :content="describe" placement="right-start">
@@ -13,7 +13,7 @@
   </div>
 </template>
 <script>
-  // import Highcharts from 'highcharts'
+  import Highcharts from 'highcharts'
   import {Icon} from 'iview'
   export default {
     // 验证类型
@@ -59,6 +59,11 @@
 </script>
 
 <style lang="scss" scoped>
+  .chart-body{
+    width: 90%;
+    /*margin: auto;*/
+    max-width: 650px;
+  }
   .x-bar {
     border: none;
   }
@@ -69,6 +74,7 @@
     height: 50px;
     text-align: center;
     font-size: 15px;
+    font-weight: 600;
     overflow: hidden;
     align-items:center;
     .headTitle{
@@ -80,6 +86,9 @@
     float: left;
     border: none;
     font-size: 18px;
+    position: relative;
+    top: 8px;
+    left: 5px;
     .ivu-icon {
       color: rgb(43,133,228);
     }

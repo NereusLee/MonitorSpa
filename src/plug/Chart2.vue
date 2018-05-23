@@ -1,11 +1,12 @@
 <template>
-  <div :option="option">
+  <div class="chart-body" :option="option">
     <div class="chart-head">
       <!--介绍文字和图标-->
       <el-tooltip class="item" effect="light" :content="describe" placement="right-start">
         <el-button class='el-but'><Icon type="information-circled"></Icon></el-button>
       </el-tooltip>
       <div class="headTitle">{{title}}</div>
+      <Icon type="arrow-expand" @click="expand"></Icon>
     </div>
     <ul class="comparison">
       <li>
@@ -49,11 +50,22 @@
       }
     }
   }
+
+  function randomString(len) {   //随机生成字符串  用来做id
+      len = len || 32;
+      var $chars = 'abcdefhijkmnprstwxyz2345678';  /****默认去掉了容易混淆的字符oOLl,9gq,Vv,Uu,I1****/
+      var maxPos = $chars.length;
+      var pwd = '';
+      for (let i = 0; i < len; i++) {
+          pwd += $chars.charAt(Math.floor(Math.random() * maxPos));
+      }
+      return pwd;
+  }
   export default {
     // 验证类型
     props: {
-      id: {
-        type: String
+      initFalg:{
+        type:Boolean
       },
       option: {
         type: Object
@@ -67,10 +79,12 @@
     },
     data() {
       return {
+        id:'',
         title: '',
         compare:[],
         time:'',
-        current:0//初始值
+        current:0,//初始值
+        optionBig:{}
       }
     },
     methods:{
@@ -101,13 +115,27 @@
         }
         return `${hour}:${min-5}`
       },
+      expand(){  //放大效果
+        log(this.optionBig)
+        this.$emit('expand',{opt:this.optionBig,title:this.title,des:this.describe})
+      },
       showChart(series, categories, title, chartType){
         let that = this
-        return {
+        let opt = {
           chart: {
             type: chartType, //指定图表的类型，默认是折线图（line）
-            zoomType: 'x'
+            zoomType: 'x',
+            events:{
+              redraw:function () {
+                let container = this.container
+                let width = $(container).width()
+                let height = Math.min(0.92*width,400)+'px'
+                $(this.container).height(height)
+                $(container).children('.highcharts-root').height(height)
+              }
+            }
           },
+          colors:['#7070FF','#FF5757','#6AFF6A' ],
           credits: {
             enabled: false
           }, //去掉地址
@@ -164,31 +192,57 @@
             useHTML: true
           }
         }
+        this.optionBig = opt
+        return opt
       }
     },
     computed:{
       ...mapState(['compareData']),
 
     },
-    // mounted() {
-    //     // console.log(typeof(this.option.series[0]['data'][0]))
-    //     Highcharts.chart(this.id, this.option)
-    // },
+    mounted() {
+
+    },
     created() {
       // console.log(this)
-      this.compareInit()
+      this.id = randomString(4)
+      log(this.id)
       this.time = this.now()
-      this.title = this.option.title
-      this.$nextTick(() => {
-        let opt = this.option
-        let optObj = this.showChart(
-          opt.series,
-          opt.categories,
-          opt.title,
-          opt.type,
-        )
-        Highcharts.chart(this.id, optObj)
+        this.compareInit()
+        this.$nextTick(()=>{
+          if(this.initFlag!==true){
+              this.title = this.option.title.split(' ')[2]
+              let opt = this.option
+              let optObj = this.showChart(
+                  opt.series,
+                  opt.categories,
+                  opt.title,
+                  opt.type,
+              )
+              Highcharts.chart(this.id, optObj)
+          }else{
+              log(this.option)
+              this.title = this.option.title
+              this.describe = this.option.des
+              this.compareInit()
+              log(this.compare,this.describe,this.compareData[0])
+              this.$nextTick(()=>{
+                  Highcharts.chart(this.id, this.option.opt)
+              })
+          }
       })
+
+      // this.$nextTick(() => {
+      //   let opt = this.option
+      //   let optObj = this.showChart(
+      //     opt.series,
+      //     opt.categories,
+      //     opt.title,
+      //     opt.type,
+      //   )
+      //   this.id = randomString(4)
+      //   Highcharts.chart(this.id, optObj)
+      // })
 
     }
   }
@@ -198,10 +252,21 @@
 </script>
 
 <style lang="scss" scoped>
+  .chart-body{
+    width:100%;
+    margin: 0 auto 35px;
+    background-color: white;
+    padding: 0 18px 0 0;
+  }
   .x-bar {
     border: none;
   }
-
+  @mixin center(){
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+  }
   .chart-head {
     position: relative;
     margin: 0;
@@ -214,12 +279,22 @@
     .headTitle{
       display: inline-block;
       line-height: 50px;
+      font-weight: 800;
+    }
+    .ivu-icon-arrow-expand{
+      font-size: 18px;
+      color: rgb(43,133,228);
+      float: right;
+      line-height: 50px;
     }
   }
   .el-button {
     float: left;
     border: none;
     font-size: 18px;
+    position: relative;
+    top: 8px;
+    left: 5px;
     .ivu-icon {
       color: rgb(43,133,228);
     }
@@ -228,14 +303,18 @@
     }
   }
   .comparison{
+    overflow: hidden;
     li{
       float:right;
       margin-left: 15px;
+      overflow: hidden;
       p{
         text-align: center;
         color:rgb(55,34,255);
       }
     }
+
+
     li:nth-child(1){
       float:left;
     }

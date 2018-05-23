@@ -81,25 +81,27 @@ export default new Vuex.Store({
         compareData:{}
     },
     actions: {
-        getStartingMode(context, date) { //获取启动方式分组的数据
+         async getStartingMode(context, date) { //获取启动方式分组的数据
             context.commit('changeLoading') //加载动画
-              let arg = arguments[1]||[GetDateStr(-5),GetDateStr(0)]
+              let arg = arguments[1]||[GetDateStr(-7),GetDateStr(-1)]
             let url = `http://yd.lg.webdev.com/accesslayer/NewsdailyPVUV/GetSimgleTrendChart?sdate=${arg[0]}&edate=${arg[1]}`
-            axios(url).then(dat => {
-                let res = dat.data
-                context.commit('changeStartingMdoe', res)
-            })
-            //axios('https://api.myjson.com/bins/zwdji')
+            // axios(url).then(dat => {
+            //     let res = dat.data
+            //     context.commit('changeStartingMdoe', res)
+            // })
+            //  let res = await axios(url).data
+             let res = await axios('https://api.myjson.com/bins/zwdji').data
+             context.commit('changeStartingMode',res)
         },
         async getChannelsData(context,{date,channel}) { //获取按频道分组的数据
             context.commit('changeLoading')
-            // let seDate = [GetDateStr(-5),GetDateStr(0)]
+            // let seDate = [GetDateStr(-7),GetDateStr(-1)]
             let arg = arguments[1]
               // console.log(arg.date[0])
             let url = `http://yd.lg.webdev.com/accesslayer/NewsdailyPVUV/GetChanelPvUvData?sdate=${arg.date[0]}&edate=${arg.date[1]}&channels=${arg.channel}`
-            let data = await axios(url)
+            // let data = await axios(url)
+            let data = await axios('https://api.myjson.com/bins/150pce')
             context.commit('changeChannelsData', data)
-                //axios('https://api.myjson.com/bins/150pce')
         },
         async getMonitorData(context,list) { //监视器数据
 
@@ -127,12 +129,9 @@ export default new Vuex.Store({
                     chartArr.push(obj)
 
                     let array=[]  //存放当前时间的值
-                    log(index)
-                    log(res.data.data[0].data[index])
                     let timeData = res.data.data.forEach((value,num)=>{
                       array[num]=value.data[index]
                     })
-                  log(array)
                     context.commit('changeCompareData',{
                       id:`视图ID为${list[i].mixid},属性ID为${list[i].attrid}`,
                       data:array
@@ -187,7 +186,6 @@ export default new Vuex.Store({
             state.loading = false //加载动画取消
         },
         changeChannelsData(state, v) {  //频道接口数据
-            log(state.myChannels)
             for (let value of state.opt) {
                 value.series = []
             }
@@ -244,7 +242,6 @@ export default new Vuex.Store({
                     })
                 }
             }
-            // console.log(state.opt)
             state.channelsData = []
             if (state.channelsData.length == 0) {
                 for (let value of state.opt) {
@@ -261,7 +258,6 @@ export default new Vuex.Store({
                     })
                 }
             }
-            log(state.channelsData)
             state.loading = false
         },
         changeMonitorData(state,v){
@@ -271,7 +267,7 @@ export default new Vuex.Store({
                     let series = v[i].data.data
                     let categories = v[i].data.categories
                     state.monitorData.push({
-                        id: randomString(4),
+                        // id: randomString(4),
                         option: {
                             series,
                             categories,

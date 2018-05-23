@@ -24,9 +24,8 @@ export default {
 
 <style>
 #app {
-  margin: 0 auto 40px;
-  padding-bottom: 20px;
-  width: 95%;
+  margin: 0;
+  width: 100%;
   position: relative;
 }
 #loading{
@@ -42,7 +41,7 @@ export default {
 #loading>img{
   position: absolute;
   top: 50%;
-  left: 50%;
+  left: 55%;
   transform: translate(-50%, -50%);
 }
 

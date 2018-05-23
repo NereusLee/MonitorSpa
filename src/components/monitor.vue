@@ -1,26 +1,30 @@
 <template>
     <div class="monitor">
         <myMenu :theme="theme" :menuList="menuList" @switchCarts="switchCarts" :myStyle="{width:'240px'}"></myMenu>
-        <!--<el-row>-->
-            <ul class="charts">
-              <el-row :gutter="100">
-                <el-col :span="12" v-for="(x,index) in list" :key="x.id">
-                  <li>
-                    <chart2 :id="x.id" :option="x.option" :describe="x.describe"></chart2>
-                  </li>
+        <!--放大后的图表位置-->
+        <div class="big-chart" v-if="showBig">
+            <chart2 :option="optionBig" :initFlag="true"></chart2>
+        </div>
+        <div class="charts">
+              <el-row :gutter="40">
+                <el-col :span="8" v-for="(x,index) in list" :key="x.id">
+                    <chart2 :option="x.option"
+                            :describe="x.describe"
+                            @expand="bigger"
+                    ></chart2>
                 </el-col>
               </el-row>
-            </ul>
-        <!--</el-row>-->
+            </div>
     </div>
 </template>
 
 <script>
-    const log = console.log.bind(this)
     import {mapActions,mapState} from 'vuex'
     import chart2 from '@/plug/Chart2'
     import myMenu from '@/plug/myMenu'
     import {Button} from 'iview'
+    const log = console.log.bind(this)
+
     export default {
         name: "monitor",
         components:{
@@ -52,7 +56,9 @@
                 describe:'',
                 id:'asd',
                 option:{},
-                theme:'dark'
+                theme:'dark',
+                showBig:false,
+                optionBig:{}
             }
         },
         computed:{
@@ -73,27 +79,34 @@
         },
         methods:{
             ...mapActions(['getMonitorData']),
-            // getData(list){
-            //     // let ids = this.$route.params.type=='kuaibao'?this.kuaibao:this.news;
-            //     this.getMonitorData({list:list})
-            // },
             switchCarts(n){ //只负责传递menu选中的数据,由computed来进行筛选
                 let ids = this.$route.params.type=='kuaibao'?this.kuaibao:this.news;                      let arr = ids.list.filter(item=>{
                     return item.title.match(n)
                 })
                 // log(arr)
                 this.getMonitorData(arr)
+            },
+            bigger(opt){
+                this.showBig = true
+                this.optionBig = opt
             }
 
         },
         created(){
-            let ids = this.$route.params.type=='kuaibao'?this.kuaibao:this.news;
-            this.getMonitorData(ids.list)
+            // let ids = this.$route.params.type=='kuaibao'?this.kuaibao:this.news;
+            // this.getMonitorData(ids.list)
+          this.switchCarts('接入层')
         }
     }
 </script>
 
 <style lang="scss" scoped>
+    @mixin center{   //居中
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%,-50%);
+    }
     html,body{
         height: 100%;
     }
@@ -101,6 +114,14 @@
         display: flex;
         flex-direction: row;
         height: 100%;
+        background-color: rgb(243,243,243);
+        position: relative;
+        .big-chart{
+            @include center;
+            width: 80%;
+            height: 74%;
+            z-index: 5;
+        }
         .charts{
             height: 100%;
             box-sizing: border-box;
@@ -108,15 +129,20 @@
             /*overflow: auto;*/
             min-height: 968px;
             margin-top: 35px;
-            el-row{
-              height: 100%;
-              width: 100%;
-            }
-            li{
-              min-width: 100px;
-              max-height: 380px;
-              margin-bottom: 80px;
-                /*float:left;*/
+            padding:0 30px;
+          el-row{
+              .el-col{
+                padding-top: 20%;
+                margin-bottom: 40px;
+                overflow: hidden;
+              }
+              .el-col:before {
+                content: "";
+                display: inline-block;
+                padding-bottom: 100%;
+                width: .1px;
+                vertical-align: middle;
+              }
             }
         }
     }

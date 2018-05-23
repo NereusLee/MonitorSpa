@@ -1,4 +1,4 @@
-import $ from 'jquery'
+// import $ from 'jquery'
 import Highcharts from 'highcharts';
 
 function comparison(num1,num2) {
@@ -76,17 +76,10 @@ export function showChart(series, categories, ytitle, suffix, title, chartType, 
             useHTML: true
         }
     }
-    if (type == 1) {
-        return {
-            title:title,
-            option:$.extend({}, chartOption, tool)
-        }
-    } else {
         return {
             title:title,
             option:chartOption
         }
-    }
 
 }
 

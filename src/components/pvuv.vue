@@ -1,18 +1,18 @@
 <template>
-    <div>
-        <el-row>
+    <div id="pvuv">
+        <el-row style="margin-left: 17px">
             <el-col :span="24">
                 <query-condition :rou="this.$route.params.id"></query-condition>
             </el-col>
         </el-row>
         <el-row>
-            <ul id="charts">
+            <div id="charts">
                 <el-col :span="12" v-for="(x,index) in list">
-                    <li>
+                    <!--<li>-->
                         <chart :id="x.id" :option="x.option"  :describe="describe[index]"></chart>
-                    </li>
+                    <!--</li>-->
                 </el-col>
-            </ul>
+            </div>
         </el-row>
     </div>
 </template>
@@ -58,17 +58,14 @@
         },
         watch: {
             StartingMode(n) {
-                log(n)
                 this.list = this.startingMode
             },
             ChannelsData(n) {
-                log(n)
                 this.list = this.channelsData
             },
             $route(m) {
                 let n = m.params.id
                 this.repaint(n)
-                log(this.list)
             }
         },
         methods: {
@@ -79,7 +76,7 @@
                     this.getStartingMode()
                     this.list = this.startingMode
                 } else if (n == 'channel'&&this.first) {
-                    let seDate = [GetDateStr(-5),GetDateStr(0)]
+                    let seDate = [GetDateStr(-7),GetDateStr(-1)]
                     this.getChannelsData({date:seDate ,channel:`news_news_top,news_news_ent,news_news_finance,news_news_sports,news_news_tech,news_topic`})
                     this.first = false
                     // this.list = this.channelsData
@@ -90,13 +87,15 @@
             // this.list =
             let n = this.$route.params.id
             this.repaint(n)
-            log(this.list)
         }
     }
 
 </script>
 <style lang="scss" scoped>
-    ul {
+    #pvuv{
+        padding-left: 20px;
+    }
+    #charts {
         list-style-type: none;
         overflow: hidden;
         /*width:80%;*/

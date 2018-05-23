@@ -80,11 +80,9 @@
             ...mapMutations(['changeMyChannels']),
             search() {
                 this.but.loading = true
-                log(typeof (this.channels.join(',')))
                 if(this.rou == 'channel'){
                     this.changeMyChannels(this.channels.join(','))
                 }
-                console.log(this.myChannels)
                 let goSearch = this.rou == 'startStyle' ? this.getStartingMode(this.seDate) : this.getChannelsData({date:this.seDate, channel:this.channels.join(',')})
                 goSearch.then(() => {
                     this.but.loading = false
@@ -98,7 +96,9 @@
     .date-body {
         width: 100%;
         overflow: hidden;
-
+        .demonstration{
+            font-weight: 800;
+        }
         .block {
             display: inline-block;
             float: left;
