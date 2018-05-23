@@ -5,7 +5,7 @@
       <el-tooltip class="item" effect="light" :content="describe" placement="right-start">
         <el-button class='el-but'><Icon type="information-circled"></Icon></el-button>
       </el-tooltip>
-      <div class="headTitle">{{title}}</div>
+      <div class="headTitle">{{title2}}</div>
       <Icon type="arrow-expand" @click="expand"></Icon>
     </div>
     <ul class="comparison">
@@ -32,6 +32,7 @@
   import $ from 'jquery'
   import {Icon} from 'iview'
   import {mapState} from 'vuex'
+  import axios from 'axios'
 
   const log = console.log.bind(this)
   function comparison(num1,num2) {  //计算变化率
@@ -70,9 +71,9 @@
       option: {
         type: Object
       },
-      describe: {
-        type: String
-      }
+      // describe: {
+      //   type: String
+      // }
     },
     components:{
       Icon
@@ -81,15 +82,18 @@
       return {
         id:'',
         title: '',
+        title2:'',//真正的标题
         compare:[],
         time:'',
         current:0,//初始值
-        optionBig:{}
+        optionBig:{},
+        monitorData:{},
+        compareData:[]
       }
     },
     methods:{
       compareInit(){
-        let arr = this.compareData[this.describe]
+        let arr = this.compareData
         let day = comparison(arr[0],arr[1])
         let week = comparison(arr[0],arr[2])
         this.compare = [
@@ -104,6 +108,7 @@
             color:week.color
           },
         ]
+        log(this.compare)
         this.current = arr[0]
       },
       now(){
@@ -115,9 +120,64 @@
         }
         return `${hour}:${min-5}`
       },
+      getDataNow(num){  //拿到当前时间在后台数据中对应的序号
+        let myDate = new Date()
+        let hour = myDate.getHours()
+        let min = myDate.getMinutes()
+        if(min<num){
+          return (hour-1)*60+min+60-num
+        }
+        return hour*60+min-num
+      },
+      async getMonitorData() { //监视器数据
+        // context.commit('changeLoading')
+        let ids = this.option
+        var chartArr = []
+        let index = this.getDataNow(5)  //以当前时间的五分钟前为序号
+          let res
+          let url = `http://yd.lg.webdev.com/accesslayer/NewsMonitorAccesslayer/GetThreeDailyData?type=1&mixid=${ids.mixid}&attrid=${ids.attrid}`
+          try{
+            // res=await axios(url)
+
+            res = await axios('https://api.myjson.com/bins/q8rni')
+          }catch (e) {
+            res = {}
+          }
+          let obj = {
+            title:ids.title,
+            data:res.data,
+            mixid:ids.mixid,
+            attrid:ids.attrid
+          }
+        this.changeMonitorData(obj)
+
+
+
+        let array=[]  //存放当前时间的值
+        res.data.data.forEach((value,num)=>{
+            array[num]=value.data[index]
+          })
+        this.compareData = array;
+      },
+      changeMonitorData(obj){
+        if(obj.data){
+          let series = obj.data.data
+          let categories = obj.data.categories
+          this.monitorData = {
+            option: {
+              series,
+              categories,
+              title:obj.title,
+              type:'line',
+            },
+            describe:`视图ID为${obj.mixid},属性ID为${obj.attrid}`
+          }
+        }
+
+      },
       expand(){  //放大效果
-        log(this.optionBig)
-        this.$emit('expand',{opt:this.optionBig,title:this.title,des:this.describe})
+        // log(this.optionBig)
+        this.$emit('expand',{opt:this.optionBig,title:this.title,des:this.monitorData.describe})
       },
       showChart(series, categories, title, chartType){
         let that = this
@@ -196,30 +256,35 @@
         return opt
       }
     },
-    computed:{
-      ...mapState(['compareData']),
+    // mounted() {
+    //
+    // },
+    created(){
 
     },
     mounted() {
+      if(this.initFlag!==true){
+            this.id = randomString(4)
+            this.time = this.now()
+            // this.compareInit()
+        this.getMonitorData().then(()=>{   //保证在compareInit执行时this.compareData有值
+          this.compareInit()
+          this.$nextTick(()=>{
+            this.title = this.monitorData.option.title
+            log(this.title)
+            this.title2 = this.monitorData.option.title.split(' ')[2]
+            let opt = this.monitorData.option
+            let optObj = this.showChart(
+              opt.series,
+              opt.categories,
+              opt.title,
+              opt.type,
+            )
+            Highcharts.chart(this.id, optObj)
+          })
+        })
+        log(33)
 
-    },
-    created() {
-      // console.log(this)
-      this.id = randomString(4)
-      log(this.id)
-      this.time = this.now()
-        this.compareInit()
-        this.$nextTick(()=>{
-          if(this.initFlag!==true){
-              this.title = this.option.title.split(' ')[2]
-              let opt = this.option
-              let optObj = this.showChart(
-                  opt.series,
-                  opt.categories,
-                  opt.title,
-                  opt.type,
-              )
-              Highcharts.chart(this.id, optObj)
           }else{
               log(this.option)
               this.title = this.option.title
@@ -230,7 +295,6 @@
                   Highcharts.chart(this.id, this.option.opt)
               })
           }
-      })
 
       // this.$nextTick(() => {
       //   let opt = this.option

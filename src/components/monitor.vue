@@ -8,8 +8,7 @@
         <div class="charts">
               <el-row :gutter="40">
                 <el-col :span="8" v-for="(x,index) in list" :key="x.id">
-                    <chart2 :option="x.option"
-                            :describe="x.describe"
+                    <chart2 :option="x"
                             @expand="bigger"
                     ></chart2>
                 </el-col>
@@ -64,7 +63,7 @@
         computed:{
             ...mapState(['monitorData']),
             list(){
-                return this.monitorData
+                return this.$route.params.type=='kuaibao'?this.kuaibao.list:this.news.list
             },
             menuList(){
                 let ids = this.$route.params.type=='kuaibao'?this.kuaibao:this.news;
@@ -80,13 +79,14 @@
         methods:{
             ...mapActions(['getMonitorData']),
             switchCarts(n){ //只负责传递menu选中的数据,由computed来进行筛选
-                let ids = this.$route.params.type=='kuaibao'?this.kuaibao:this.news;                      let arr = ids.list.filter(item=>{
+                let ids = this.$route.params.type=='kuaibao'?this.kuaibao:this.news;                let arr = ids.list.filter(item=>{
                     return item.title.match(n)
                 })
                 // log(arr)
                 this.getMonitorData(arr)
             },
             bigger(opt){
+              log(opt)
                 this.showBig = true
                 this.optionBig = opt
             }
@@ -95,7 +95,7 @@
         created(){
             // let ids = this.$route.params.type=='kuaibao'?this.kuaibao:this.news;
             // this.getMonitorData(ids.list)
-          this.switchCarts('接入层')
+          // this.switchCarts('接入层')
         }
     }
 </script>

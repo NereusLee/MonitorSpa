@@ -29,16 +29,6 @@ function randomString(len) {   //随机生成字符串
     return pwd;
 }
 
-// function now(){  //获取当前时间前五分钟
-//   let myDate = new Date()
-//   let hour = myDate.getHours()
-//   let min = myDate.getMinutes()
-//   if(min<5){
-//     return `${(hour-1)}:${min+55}`
-//   }
-//   return `${hour}:${min-5}`
-// }
-
 function getDataNow(num){  //拿到当前时间在后台数据中对应的序号
   let myDate = new Date()
   let hour = myDate.getHours()
@@ -93,7 +83,7 @@ export default new Vuex.Store({
              let res = await axios('https://api.myjson.com/bins/zwdji').data
              context.commit('changeStartingMode',res)
         },
-        async getChannelsData(context,{date,channel}) { //获取按频道分组的数据
+         async getChannelsData(context,{date,channel}) { //获取按频道分组的数据
             context.commit('changeLoading')
             // let seDate = [GetDateStr(-7),GetDateStr(-1)]
             let arg = arguments[1]
@@ -103,12 +93,10 @@ export default new Vuex.Store({
             let data = await axios('https://api.myjson.com/bins/150pce')
             context.commit('changeChannelsData', data)
         },
-        async getMonitorData(context,list) { //监视器数据
-
+         async getMonitorData(context,list) { //监视器数据
             context.commit('changeLoading')
             var chartArr = []
             let index = getDataNow(5)
-          log(index)
                 for(let i=0;i<list.length;i++){
 
                     let res
@@ -290,9 +278,6 @@ export default new Vuex.Store({
                 }
             }
             state.loading = false //加载动画取消
-            // log(state.monitorData)
-
-
         }
     }
 })
