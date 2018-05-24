@@ -28,7 +28,6 @@
         },
         methods:{
             select(n){
-                console.log(n)
                 this.$emit('switchCarts',n)
             }
         },

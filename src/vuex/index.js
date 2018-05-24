@@ -79,10 +79,10 @@ export default new Vuex.Store({
              let res = await axios('https://api.myjson.com/bins/zwdji')
              context.commit('changeStartingMode',res)
         },
-         async getChannelsData(context,{date,channel}) { //获取按频道分组的数据
+         async getChannelsData(context) { //获取按频道分组的数据
             context.commit('changeLoading')
-            // let seDate = [GetDateStr(-7),GetDateStr(-1)]
-            let arg = arguments[1]
+            let seDate = [GetDateStr(-7),GetDateStr(-1)]
+            let arg = arguments[1]||{date:seDate,channel:`news_news_top,news_news_ent,news_news_finance,news_news_sports,news_news_tech,news_topic`}
               // console.log(arg.date[0])
             let url = `http://yd.lg.webdev.com/accesslayer/NewsdailyPVUV/GetChanelPvUvData?sdate=${arg.date[0]}&edate=${arg.date[1]}&channels=${arg.channel}`
             // let data = await axios(url)
@@ -205,6 +205,7 @@ export default new Vuex.Store({
                     })
                 }
             }
+            log(JSON.stringify(state.channelsData[2]))
             state.loading = false
         },
     }

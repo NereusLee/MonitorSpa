@@ -30,8 +30,8 @@
                 相比一天前
             </li>
         </ul>
-        <div class="x-bar">
-            <p :id="id"></p>
+        <div class="x-bar" style="height: 320px;">
+            <p :id="id" style="height: 320px;"></p>
         </div>
     </div>
 </template>
@@ -83,7 +83,7 @@
                 type: Object
             },
             compareToBig: {
-              type: Array
+              type: Object
             }
         },
         components: {
@@ -106,6 +106,7 @@
           compareToBig(n){
               this.compare = n.arr
               this.time = n.time
+              this.current = n.current
           },
           option(n){
               this.reflash()
@@ -250,7 +251,6 @@
                                 let container = this.container
                                 let width = $(container).width()
                                 let height = Math.min(0.92 * width, 350) + 'px'
-                                log(height)
                                 $(this.container).height(height)
                                 $(container).children('.highcharts-root').height(height)
                             }
@@ -312,7 +312,11 @@
                                 },
                             ]
                             that.$data.compare = arr
-                            that.$emit('compareFromBig',{arr,time:points[0].x})  //expand函数传过去时,that指向的还是原来小图的vue实例,因此只能手动再把compare的数值传过去
+                            that.$emit('compareFromBig',{
+                              arr,
+                              time:points[0].x,
+                              current:points[0].y
+                            })  //expand函数传过去时,that指向的还是原来小图的vue实例,因此只能手动再把compare的数值传过去
                             that.$data.current = points[0].y
                             return s;
                         },
@@ -327,7 +331,6 @@
             if (this.initFlag !== true) {
                 this.reflash()
             } else {
-                log(this.option)
                 this.id = randomString(4)
                 this.title2 = this.option.title
                 this.monitorData.describe = this.option.des
@@ -420,5 +423,11 @@
         li:nth-child(1) {
             float: left;
         }
+    }
+    .highcharts-root{
+      max-height: 320px!important;
+    }
+    .highcharts-container{
+      height: 320px;
     }
 </style>

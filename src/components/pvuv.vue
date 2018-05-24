@@ -8,9 +8,10 @@
             <div id="charts">
                 <el-row :gutter="40">
                 <el-col :span="12" v-for="(x,index) in list">
-                    <!--<li>-->
-                        <chart :id="x.id" :option="x.option"  :describe="describe[index]"></chart>
-                    <!--</li>-->
+                        <chart :id="ids[index]"
+                               :option="x.option"
+                               :describe="describe[index]"
+                        ></chart>
                 </el-col>
                 </el-row>
             </div>
@@ -38,6 +39,7 @@
                 list: [],
                 describe: ['图文PV', '图文UV','视频UV','视频PV'],
                 title: ['图文PV', '图文UV','视频UV','视频PV'],
+                ids:['articlepv','articleuv','videouv','videovv']
                 // first:true  //初次加载
             }
         },
@@ -57,12 +59,12 @@
             }
         },
         watch: {
-            StartingMode(n) {
-                this.list = this.startingMode
-            },
-            ChannelsData(n) {
-                this.list = this.channelsData
-            },
+            // StartingMode(n) {
+            //     this.list = this.startingMode
+            // },
+            // ChannelsData(n) {
+            //     this.list = this.channelsData
+            // },
             $route(m) {
                 let n = m.params.id
                 this.repaint(n)
@@ -73,11 +75,13 @@
             repaint(n) {
                 if (n == 'startStyle') {
                     let seDate = [GetDateStr(-7),GetDateStr(-1)]
-                    this.getStartingMode(seDate)
-                    this.list = this.startingMode
+                    this.getStartingMode(seDate).then(()=>{
+                      this.list = this.startingMode
+                    })
                 } else if (n == 'channel') {
-                    let seDate = [GetDateStr(-7),GetDateStr(-1)]
-                    this.getChannelsData({date:seDate ,channel:`news_news_top,news_news_ent,news_news_finance,news_news_sports,news_news_tech,news_topic`})
+                    this.getChannelsData().then(()=>{
+                      this.list = this.channelsData
+                    })
                     // this.first = false
                     // this.list = this.channelsData
                 }

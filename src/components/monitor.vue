@@ -16,7 +16,8 @@
             </div>
             <el-row :gutter="40">
                 <el-col :span="8" v-for="(x,index) in list" :key="x.id">
-                    <chart2 :option="x"
+                    <chart2 style="max-height: 430px"
+                            :option="x"
                             :initFlag="false"
                             @expand="bigger"
                             @compareFromBig="compareFromBig"
@@ -93,16 +94,13 @@
         methods: {
             ...mapActions(['getMonitorData']),
             switchCarts(n) { //只负责传递menu选中的数据,由computed来进行筛选
-                log(n)
                 let ids = this.$route.params.type == 'kuaibao' ? this.kuaibao : this.news;
                 let arr = ids.list.filter(item => {
                     return item.title.match(n)
                 })
-                log(arr)
                 this.list = arr
             },
             bigger(opt) {
-                log(opt)
                 this.showBig = true
                 this.optionBig = opt
             },
@@ -118,6 +116,7 @@
             // let ids = this.$route.params.type=='kuaibao'?this.kuaibao:this.news;
             // this.getMonitorData(ids.list)
             this.switchCarts('接入层')
+          $('.')
         }
     }
 </script>
@@ -168,7 +167,7 @@
                     padding-top: 20%;
                     margin-bottom: 40px;
                     overflow: hidden;
-                    max-height: 400px!important;
+                    /*max-height: 400px!important;*/
                 }
                 .el-col:before {
                     content: "";
