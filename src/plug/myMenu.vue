@@ -28,8 +28,8 @@
         },
         methods:{
             select(n){
-                // console.log(this.menuList[n])
-                this.$emit('switchCarts',this.menuList[n])
+                console.log(n)
+                this.$emit('switchCarts',n)
             }
         },
         mounted(){

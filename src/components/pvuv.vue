@@ -1,19 +1,19 @@
 <template>
     <div id="pvuv">
-        <el-row style="margin-left: 17px">
+        <el-row style="margin-left: 17px;">
             <el-col :span="24">
                 <query-condition :rou="this.$route.params.id"></query-condition>
             </el-col>
         </el-row>
-        <el-row>
             <div id="charts">
+                <el-row :gutter="40">
                 <el-col :span="12" v-for="(x,index) in list">
                     <!--<li>-->
                         <chart :id="x.id" :option="x.option"  :describe="describe[index]"></chart>
                     <!--</li>-->
                 </el-col>
+                </el-row>
             </div>
-        </el-row>
     </div>
 </template>
 <script>
@@ -38,7 +38,7 @@
                 list: [],
                 describe: ['图文PV', '图文UV','视频UV','视频PV'],
                 title: ['图文PV', '图文UV','视频UV','视频PV'],
-                first:true  //初次加载
+                // first:true  //初次加载
             }
         },
         components: {
@@ -71,20 +71,19 @@
         methods: {
             ...mapActions(['getStartingMode', 'getChannelsData']),
             repaint(n) {
-                // console.log(n)
                 if (n == 'startStyle') {
-                    this.getStartingMode()
+                    let seDate = [GetDateStr(-7),GetDateStr(-1)]
+                    this.getStartingMode(seDate)
                     this.list = this.startingMode
-                } else if (n == 'channel'&&this.first) {
+                } else if (n == 'channel') {
                     let seDate = [GetDateStr(-7),GetDateStr(-1)]
                     this.getChannelsData({date:seDate ,channel:`news_news_top,news_news_ent,news_news_finance,news_news_sports,news_news_tech,news_topic`})
-                    this.first = false
+                    // this.first = false
                     // this.list = this.channelsData
                 }
             }
         },
         created() {
-            // this.list =
             let n = this.$route.params.id
             this.repaint(n)
         }
@@ -93,6 +92,7 @@
 </script>
 <style lang="scss" scoped>
     #pvuv{
+        padding-top: 9px;
         padding-left: 20px;
     }
     #charts {
@@ -115,13 +115,17 @@
     }
 
     .el-row {
-        margin-bottom: 20px;
+        margin-bottom: 5px;
         &:last-child {
             margin-bottom: 0;
         }
     }
 
-    .el-col {
+    #charts .el-col {
         border-radius: 4px;
+        max-height: 450px;
     }
+    /*#charts>.el-col-12:nth-child(even){*/
+        /*margin-left: 20px!important;*/
+    /*}*/
 </style>

@@ -19,6 +19,7 @@
                 size="small"
         >
         <el-option
+                size="small"
                 v-for="item in options"
                 :key="item.value"
                 :label="item.label"

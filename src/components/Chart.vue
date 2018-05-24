@@ -48,7 +48,7 @@
     //     // console.log(typeof(this.option.series[0]['data'][0]))
     //     Highcharts.chart(this.id, this.option)
     // },
-    created() {
+    mounted() {
       // console.log(this.id)
       this.title = this.option.title
       this.$nextTick(() => {
@@ -62,7 +62,11 @@
   .chart-body{
     width: 90%;
     /*margin: auto;*/
-    max-width: 650px;
+    max-width: 600px;
+    /*height: 420px;*/
+  }
+  .chart-root{
+    height: 420px;
   }
   .x-bar {
     border: none;

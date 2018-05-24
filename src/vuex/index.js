@@ -75,12 +75,8 @@ export default new Vuex.Store({
             context.commit('changeLoading') //加载动画
               let arg = arguments[1]||[GetDateStr(-7),GetDateStr(-1)]
             let url = `http://yd.lg.webdev.com/accesslayer/NewsdailyPVUV/GetSimgleTrendChart?sdate=${arg[0]}&edate=${arg[1]}`
-            // axios(url).then(dat => {
-            //     let res = dat.data
-            //     context.commit('changeStartingMdoe', res)
-            // })
-            //  let res = await axios(url).data
-             let res = await axios('https://api.myjson.com/bins/zwdji').data
+             // let res = await axios(url)
+             let res = await axios('https://api.myjson.com/bins/zwdji')
              context.commit('changeStartingMode',res)
         },
          async getChannelsData(context,{date,channel}) { //获取按频道分组的数据
@@ -93,40 +89,6 @@ export default new Vuex.Store({
             let data = await axios('https://api.myjson.com/bins/150pce')
             context.commit('changeChannelsData', data)
         },
-         async getMonitorData(context,list) { //监视器数据
-            context.commit('changeLoading')
-            var chartArr = []
-            let index = getDataNow(5)
-                for(let i=0;i<list.length;i++){
-
-                    let res
-                    let url = `http://yd.lg.webdev.com/accesslayer/NewsMonitorAccesslayer/GetThreeDailyData?type=1&mixid=${list[i].mixid}&attrid=${list[i].attrid}`
-                    try{
-                       // res=await axios(url)
-
-                        res = await axios('https://api.myjson.com/bins/q8rni')
-                    }catch (e) {
-                       res = {}
-                    }
-                    let obj = {
-                        title:list[i].title,
-                        data:res.data,
-                        mixid:list[i].mixid,
-                        attrid:list[i].attrid
-                    }
-                    chartArr.push(obj)
-
-                    let array=[]  //存放当前时间的值
-                    let timeData = res.data.data.forEach((value,num)=>{
-                      array[num]=value.data[index]
-                    })
-                    context.commit('changeCompareData',{
-                      id:`视图ID为${list[i].mixid},属性ID为${list[i].attrid}`,
-                      data:array
-                    })
-                }
-                context.commit('changeMonitorData',chartArr)
-        }
     },
     mutations: {
         changeCompareData(state,v){
@@ -138,10 +100,10 @@ export default new Vuex.Store({
         changeMyChannels(state,v){
           state.myChannels = v
         },
-        changeStartingMdoe(state, res) {  //接入方式接口数据
+        changeStartingMode(state, res) {  //接入方式接口数据
             let firstTitle = []
-            let sm = res.data
-            let categories = res.categories.map(item => { //时间,横坐标
+            let sm = res.data.data
+            let categories = res.data.categories.map(item => { //时间,横坐标
                 return `${item.slice(4, 6).match(/[1-9]+/)[0]}月${item.slice(6)}日`
             })
             let cnName = ['图文PV', '图文UV', '视频UV', '视频PV']
@@ -155,7 +117,6 @@ export default new Vuex.Store({
                     })
 
                 }
-                // console.log('series:  '+JSON.stringify(series))
                 firstTitle.push({
                     id: `${k1}`,
                     option: showChart(
@@ -170,7 +131,6 @@ export default new Vuex.Store({
                 index++
             }
             state.startingMode = firstTitle
-            // log(firstTitle)
             state.loading = false //加载动画取消
         },
         changeChannelsData(state, v) {  //频道接口数据
@@ -205,7 +165,6 @@ export default new Vuex.Store({
                 }
 
             }
-            // console.log(canvas)
 
             for (let key1 in canvas) {
                 let index;
@@ -248,36 +207,5 @@ export default new Vuex.Store({
             }
             state.loading = false
         },
-        changeMonitorData(state,v){
-            state.monitorData = []
-            for(let i=0;i<v.length;i++){
-                if(v[i].data){
-                    let series = v[i].data.data
-                    let categories = v[i].data.categories
-                    state.monitorData.push({
-                        // id: randomString(4),
-                        option: {
-                            series,
-                            categories,
-                            title:v[i].title,
-                            type:'line',
-                        },
-                        // state.monitorData.push({
-                        // id: value.id,
-                        // option: showChart(
-                        //     v.data,
-                        //     v.categories,
-                        //     '', '',
-                        //     '',
-                        //     'line',
-                        //     '', ''
-                        // )
-                    // }),
-                        describe:`视图ID为${v[i].mixid},属性ID为${v[i].attrid}`
-                    })
-                }
-            }
-            state.loading = false //加载动画取消
-        }
     }
 })
