@@ -184,60 +184,6 @@ export default {
       }
       return hour * 60 + min - num
     },
-    closeIt () {
-      this.$emit('closeIt')
-    },
-    async getMonitorData () { // 监视器数据
-      // context.commit('changeLoading')
-      let ids = this.option
-      var chartArr = []
-      let index = this.getDataNow(5) // 以当前时间的五分钟前为序号
-      let res
-      let url = `http://test.lg.webdev.com/accesslayer/NewsMonitorAccesslayer/GetThreeDailyData?type=1&mixid=${ids.mixid}&attrid=${ids.attrid}`
-      try {
-        res=await axios(url)
-
-        // res = await axios('https://api.myjson.com/bins/q8rni')
-      } catch (e) {
-        res = {}
-      }
-      let obj = {
-        title: ids.title,
-        data: res.data,
-        mixid: ids.mixid,
-        attrid: ids.attrid
-      }
-      this.changeMonitorData(obj)
-
-      let array = [] // 存放当前时间的值
-      res.data.data.forEach((value, num) => {
-        array[num] = value.data[index]
-      })
-      this.compareData = array
-    },
-    changeMonitorData (obj) {
-      if (obj.data) {
-        let series = obj.data.data
-        let categories = obj.data.categories
-        this.monitorData = {
-          option: {
-            series,
-            categories,
-            title: obj.title,
-            type: 'line'
-          },
-          describe: `视图ID为${obj.mixid},属性ID为${obj.attrid}`
-        }
-      }
-    },
-    expand () { // 放大效果
-      this.$emit('expand', {
-        opt: this.optionBig,
-        title: this.title,
-        des: this.monitorData.describe,
-        compareData: this.compareData
-      })
-    },
     showChart (series, categories, title, chartType) {
       let that = this
       let opt = {
@@ -249,7 +195,7 @@ export default {
               let container = this.container
               let width = $(container).width()
               let height = Math.min(0.92 * width, 350) + 'px'
-              if(0.92*width<330) height = '330px'
+              if (0.92 * width < 330) height = '330px'
               $(this.container).height(height)
               $(container).children('.highcharts-root').height(height)
             }
@@ -424,9 +370,9 @@ export default {
         }
     }
     .highcharts-root{
-      max-height: 320px!important;
+        max-height: 320px!important;
     }
     .highcharts-container{
-      height: 320px;
+        height: 320px;
     }
 </style>

@@ -1,6 +1,6 @@
 <template>
     <Menu ref="side_menu" :theme="theme" active-name="接入层" @on-select="select" :style="myStyle">
-        <MenuGroup title="关键指标监控">
+        <MenuGroup :title=title>
             <MenuItem v-for="(x,index) in menuList" :key="x" :name="x" >
                 <Icon type="document-text"></Icon>
                 {{x}}
@@ -30,6 +30,22 @@
             select(n){
                 this.$emit('switchCarts',n)
             }
+        },
+        computed:{
+            title(){
+                let rou = this.$route.params.type
+                let tt = '关键指标监控'
+                switch (rou) {
+                    case 'news':
+                          tt = '新闻'+tt;
+                          break;
+                    case 'kuaibao':
+                        tt = '快报'+tt;
+                        break;
+                }
+                return tt;
+            }
+
         },
         mounted(){
           this.$nextTick(function(){

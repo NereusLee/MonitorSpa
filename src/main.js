@@ -5,6 +5,7 @@ import App from './App'
 import router from './router'
 import $ from 'jquery'
 import bootstrap from 'bootstrap'
+import vueJsonp from 'vue-resource'
 import {showChart} from './js/chart'
 import axios from 'axios'
 import store from './vuex'
@@ -22,6 +23,7 @@ Vue.use(DatePicker)
 Vue.use(Tooltip)
 Vue.use(Option)
 Vue.use(Select)
+Vue.use(vueJsonp)
 
 Vue.config.productionTip = false
 

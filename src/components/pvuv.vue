@@ -29,9 +29,10 @@
     const log = console.log.bind(this)
     import {mapState, mapActions, mapMutations} from 'vuex'
     // 导入chart组件
-    import chart from '@/components/Chart.vue'
-    import checkBox from '@/components/checkbox.vue'
+    import chart from '@/plug/Chart.vue'
+    import checkBox from '@/components/checkbox'
     import QueryCondition from '@/plug/QueryCondition'
+    import axios from 'axios'
     export default {
         name: 'app',
         data() {
@@ -59,12 +60,12 @@
             }
         },
         watch: {
-            // StartingMode(n) {
-            //     this.list = this.startingMode
-            // },
-            // ChannelsData(n) {
-            //     this.list = this.channelsData
-            // },
+            StartingMode(n) {
+                this.list = this.startingMode
+            },
+            ChannelsData(n) {
+                this.list = this.channelsData
+            },
             $route(m) {
                 let n = m.params.id
                 this.repaint(n)
@@ -87,9 +88,11 @@
                 }
             }
         },
-        created() {
+        async created() {
             let n = this.$route.params.id
             this.repaint(n)
+            let res =await axios('http://test.lg.webdev.com/accesslayer/InewsQuality/getConnTrend')
+            console.log(res)
         }
     }
 
@@ -127,7 +130,7 @@
 
     #charts .el-col {
         border-radius: 4px;
-        max-height: 450px;
+        max-height: 425px;  //关键的样式
     }
     /*#charts>.el-col-12:nth-child(even){*/
         /*margin-left: 20px!important;*/

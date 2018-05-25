@@ -13,49 +13,49 @@
   </div>
 </template>
 <script>
-  import Highcharts from 'highcharts'
-  import {Icon} from 'iview'
-  export default {
-    // 验证类型
-    props: {
-      id: {
-        type: String
-      },
-      option: {
-        type: Object
-      },
-      describe: {
-        type: String
-      }
+import Highcharts from 'highcharts'
+import {Icon} from 'iview'
+export default {
+  // 验证类型
+  props: {
+    id: {
+      type: String
     },
-    components:{
-      Icon
+    option: {
+      type: Object
     },
-    data() {
-      return {
-        title: ''
-      }
-    },
-    watch: {
-      option(n) {
-        this.title = this.option.title
-        // this.$nextTick(()=>{
-        Highcharts.chart(this.id, this.option.option)
-        // })
-      }
-    },
-    // mounted() {
-    //     // console.log(typeof(this.option.series[0]['data'][0]))
-    //     Highcharts.chart(this.id, this.option)
-    // },
-    mounted() {
-      // console.log(this.id)
-      this.title = this.option.title
-      this.$nextTick(() => {
-        Highcharts.chart(this.id, this.option.option)
-      })
+    describe: {
+      type: String
     }
+  },
+  components: {
+    Icon
+  },
+  data () {
+    return {
+      title: ''
+    }
+  },
+  watch: {
+    option (n) {
+      this.title = this.option.title
+      // this.$nextTick(()=>{
+      Highcharts.chart(this.id, this.option.option)
+      // })
+    }
+  },
+  // mounted() {
+  //     // console.log(typeof(this.option.series[0]['data'][0]))
+  //     Highcharts.chart(this.id, this.option)
+  // },
+  mounted () {
+    // console.log(this.id)
+    this.title = this.option.title
+    this.$nextTick(() => {
+      Highcharts.chart(this.id, this.option.option)
+    })
   }
+}
 </script>
 
 <style lang="scss" scoped>

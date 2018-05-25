@@ -10,11 +10,21 @@ module.exports = {
     // Paths
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
-    proxyTable: {},
+    proxyTable: {
+        '/api': {
+            target: 'http://image.baidu.com',
+            changeOrigin: true,
+            pathRewrite: {
+                '^/api': '/'
+            }
+        }
+        // '/schema': 'http://yd.lg.webdev.com',
+        // '/accesslayer': 'http://yd.lg.webdev.com',
+    },
 
     // Various Dev Server settings
-    host: 'localhost', // can be overwritten by process.env.HOST
-    port:3020, // can be overwritten by process.env.PORT, if port is in use, a free one will be determined
+    host: '10.40.99.52', // can be overwritten by process.env.HOST
+    port:8080, // can be overwritten by process.env.PORT, if port is in use, a free one will be determined
     autoOpenBrowser: false,
     errorOverlay: true,
     notifyOnErrors: true,

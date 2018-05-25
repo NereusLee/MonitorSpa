@@ -13,15 +13,15 @@ export default new Router({
       name: 'pvuv',
       component: pvuv
     },
-   {
-       path: '/monitor/:type',
-       name: 'monitor',
-       component: monitor
-   },
-   {
-       path: '/test',
-       name: 'test',
-       component: test
-   },
+    {
+      path: '/monitor/:type',
+      component: monitor,
+      name: 'monitor'
+    },
+    {
+      path: '/test',
+      name: 'test',
+      component: test
+    }
   ]
 })
