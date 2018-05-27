@@ -1,39 +1,39 @@
 <template>
-    <div class="chart-body" :option="option">
-        <div class="chart-head">
-            <!--介绍文字和图标-->
-            <el-tooltip class="item" effect="light" :content="monitorData.describe" placement="right-start">
-                <el-button class='el-but'>
-                    <Icon type="information-circled"></Icon>
-                </el-button>
-            </el-tooltip>
-            <div class="headTitle">{{title2}}</div>
-            <Icon :type="rightTopIcon.type" @click="rightTopIcon.method"></Icon>
-        </div>
-        <ul class="comparison" v-if="compare">
-            <li>
-                <p>{{current}}</p>
-                当前({{time}})
-            </li>
-            <li>
-                <p :style="{color:compare[1].color}">
-                    <Icon :type="compare[1].icon"></Icon>
-                    {{compare[1].data}}
-                </p>
-                相比七天前
-            </li>
-            <li>
-                <p :style="{color:compare[0].color}">
-                    <Icon :type="compare[0].icon"></Icon>
-                    {{compare[0].data}}
-                </p>
-                相比一天前
-            </li>
-        </ul>
-        <div class="x-bar" style="height: 320px;">
-            <p :id="id" style="height: 320px;box-sizing: border-box;"></p>
-        </div>
+  <div class="chart-body" :option="option">
+    <div class="chart-head">
+      <!--介绍文字和图标-->
+      <el-tooltip class="item" effect="light" content="qualityData.describe" placement="right-start">
+        <el-button class='el-but'>
+          <Icon type="information-circled"></Icon>
+        </el-button>
+      </el-tooltip>
+      <div class="headTitle">{{title}}</div>
+      <Icon :type="rightTopIcon.type" ></Icon>
     </div>
+    <ul class="comparison" v-if="compare">
+      <li>
+        <p>{{current}}</p>
+        当前({{time}})
+      </li>
+      <li>
+        <p >
+          <Icon :style="{color:compare[1].color}" :type="compare[1].icon"></Icon>
+          <span :style="{color:compare[1].color}">{{compare[1].data}}</span>
+        </p>
+        相比七天前
+      </li>
+      <li>
+        <p >
+          <Icon :style="{color:compare[0].color}" :type="compare[0].icon"></Icon>
+          <span :style="{color:compare[0].color}">{{compare[0].data}}</span>
+        </p>
+        相比一天前
+      </li>
+    </ul>
+    <div class="x-bar" style="height: 320px;">
+      <p :id="id" style="height: 320px;box-sizing: border-box;"></p>
+    </div>
+  </div>
 </template>
 <script>
 import Highcharts from 'highcharts'
@@ -80,10 +80,10 @@ export default {
       type: Boolean
     },
     option: {
-      type: Object
+      type: String
     },
     compareToBig: {
-      type: Object
+      // type: Object
     }
   },
   components: {
@@ -97,9 +97,10 @@ export default {
       compare: [],
       time: '',
       current: 0, // 初始值
-      optionBig: {},
-      monitorData: {},
-      compareData: []
+      optionBig: {}, // 用来传给大图的值
+      qualityData: {},
+      compareData: [],
+      first: true // 用于判断数据是否第一次更新
     }
   },
   watch: {
@@ -129,29 +130,19 @@ export default {
   },
   methods: {
     reflash () {
-      this.id = randomString(4)
       this.time = this.now()
-      // this.compareInit()
-      this.getMonitorData().then(() => { // 保证在compareInit执行时this.compareData有值
-        this.compareInit()
+      this.title = this.option
+      this.compareInit()
+      this.getQualityData().then(() => { // 保证在compareInit执行时this.compareData有值
         this.$nextTick(() => {
-          this.title = this.monitorData.option.title
-          this.title2 = this.monitorData.option.title.split(' ')[2]
-          let opt = this.monitorData.option
-          let optObj = this.showChart(
-            opt.series,
-            opt.categories,
-            opt.title,
-            opt.type
-          )
-          Highcharts.chart(this.id, optObj)
+          this.compareInit()
         })
       })
     },
-    compareInit () {
+    compareInit () { // 数据给的是昨天,一周前,今天
       let arr = this.compareData
-      let day = comparison(arr[0], arr[1])
-      let week = comparison(arr[0], arr[2])
+      let day = comparison(arr[2], arr[0])
+      let week = comparison(arr[2], arr[1])
       this.compare = [
         {
           icon: day.icon,
@@ -164,7 +155,7 @@ export default {
           color: week.color
         }
       ]
-      this.current = arr[0]
+      this.current = arr[2]
     },
     now () {
       let myDate = new Date()
@@ -183,6 +174,50 @@ export default {
         return (hour - 1) * 60 + min + 60 - num
       }
       return hour * 60 + min - num
+    },
+    closeIt () {
+      this.$emit('closeIt')
+    },
+    async getQualityData () {
+      let options = this.option
+      let index = this.getDataNow(5) // 以当前时间的五分钟前为序号
+      let res
+      // let url = `http://test.lg.webdev.com/accesslayer/NewsMonitorAccesslayer/GetThreeDailyData?type=1&mixid=${ids.mixid}&attrid=${ids.attrid}`
+      try {
+        // res=await axios(url)
+
+        res = await axios('https://api.myjson.com/bins/hsv7y')
+      } catch (e) {
+        res = {}
+      }
+      let obj = {
+        title: options[3],
+        data: res.data,
+        mixid: options.mixid,
+        attrid: options.attrid
+      }
+      this.changequalityData(obj)
+
+      let array = [] // 存放当前时间的值
+      res.data.data.forEach((value, num) => {
+        array[num] = value.data[617] // 暂时设数字
+      })
+      this.compareData = array
+    },
+    changequalityData (obj) {
+      if (obj.data) {
+        let series = obj.data.data
+        let categories = obj.data.categories
+        this.qualityData = {
+          option: {
+            series,
+            categories,
+            title: this.option,
+            type: 'line'
+          }
+          // describe: `视图ID为${obj.mixid},属性ID为${obj.attrid}`
+        }
+      }
     },
     showChart (series, categories, title, chartType) {
       let that = this
@@ -227,7 +262,7 @@ export default {
         },
         series: series,
 
-        getThis: () => {
+        getThis: () => { // 获取当前vue的this
           return this
         },
         tooltip: {
@@ -236,14 +271,14 @@ export default {
           formatter: function () {
             let that = opt.getThis()
             let points = this.points
-            let s = `<p>${points[0].x}</p>`
+            let s = `<p>${points[2].x}</p>`
             let words = ['当前时间', '一天前', '七天前']
             $.each(points, function (i, v) {
               s += `<span style="font-weight:bold;color:#7a85a2;display: block;">${words[i]}: ${v.point.y} </span>`
-              that.$data.time = points[0].x
+              that.$data.time = points[2].x
             })
-            let day = comparison(points[0].y, points[1].y)
-            let week = comparison(points[0].y, points[2].y)
+            let day = comparison(points[2].y, points[0].y)
+            let week = comparison(points[2].y, points[1].y)
             let arr = [
               {
                 icon: day.icon,
@@ -257,12 +292,7 @@ export default {
               }
             ]
             that.$data.compare = arr
-            that.$emit('compareFromBig', {
-              arr,
-              time: points[0].x,
-              current: points[0].y
-            }) // expand函数传过去时,that指向的还是原来小图的vue实例,因此只能手动再把compare的数值传过去
-            that.$data.current = points[0].y
+            that.$data.current = points[2].y
             return s
           },
           useHTML: true
@@ -274,105 +304,123 @@ export default {
   },
   created () {
     if (this.initFlag !== true) {
+      this.id = randomString(4)
       this.reflash()
     } else {
+      this.compareInit()
       this.id = randomString(4)
       this.title2 = this.option.title
-      this.monitorData.describe = this.option.des
-      this.compareData = this.option.compareData
-      this.compareInit()
+      this.qualityData.describe = this.option.des
       this.$nextTick(() => {
+        // log(this.compareToBig)
+        // this.compareInit()
+        this.compareData = this.option.compareData
         Highcharts.chart(this.id, this.option.opt)
       })
     }
-  }
+  },
+  updated () {
+    if (this.first) {
+      this.$nextTick(() => {
+        let opt = this.qualityData.option
+        let optObj = this.showChart(
+          opt.series,
+          opt.categories,
+          opt.title,
+          opt.type
+        )
+        Highcharts.chart(this.id, optObj)
+      })
+      this.first = false
+    }
+  },
 }
 
 </script>
 
 <style lang="scss" scoped>
-    .chart-body {
-        width: 100%;
-        margin: 0 auto 35px;
-        background-color: white;
-        padding: 0 18px 0 0;
-        max-height: 433px;
-        overflow: hidden;
-    }
+  .chart-body {
+    width: 100%;
+    margin: 0 auto 35px;
+    background-color: white;
+    padding: 0 18px 0 0;
+    max-height: 433px;
+    overflow: hidden;
+  }
 
-    .x-bar {
-        border: none;
-    }
+  .x-bar {
+    border: none;
+  }
 
-    @mixin center() {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-    }
+  @mixin center() {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
 
-    .chart-head {
-        position: relative;
-        margin: 0;
-        padding: 0;
-        height: 50px;
+  .chart-head {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    height: 50px;
+    text-align: center;
+    font-size: 15px;
+    overflow: hidden;
+    align-items: center;
+    .headTitle {
+      display: inline-block;
+      line-height: 50px;
+      font-weight: 800;
+    }
+    .ivu-icon-arrow-expand {
+      font-size: 18px;
+      color: rgb(43, 133, 228);
+      float: right;
+      line-height: 50px;
+    }
+    .ivu-icon-close-round {
+      font-size: 18px;
+      float: right;
+      line-height: 50px;
+    }
+  }
+
+  .el-button {
+    float: left;
+    border: none;
+    font-size: 18px;
+    position: relative;
+    top: 8px;
+    left: 5px;
+    .ivu-icon {
+      color: rgb(43, 133, 228);
+    }
+    .el-tooltip__popper is-light {
+      background-color: rgb(255, 231, 147);
+    }
+  }
+
+  .comparison {
+    overflow: hidden;
+    li {
+      float: right;
+      margin-left: 15px;
+      overflow: hidden;
+      p {
         text-align: center;
-        font-size: 15px;
-        overflow: hidden;
-        align-items: center;
-        .headTitle {
-            display: inline-block;
-            line-height: 50px;
-            font-weight: 800;
-        }
-        .ivu-icon-arrow-expand {
-            font-size: 18px;
-            color: rgb(43, 133, 228);
-            float: right;
-            line-height: 50px;
-        }
-        .ivu-icon-close-round {
-            font-size: 18px;
-            float: right;
-            line-height: 50px;
-        }
+        color: rgb(55, 34, 255);
+      }
     }
 
-    .el-button {
-        float: left;
-        border: none;
-        font-size: 18px;
-        position: relative;
-        top: 8px;
-        left: 5px;
-        .ivu-icon {
-            color: rgb(43, 133, 228);
-        }
-        .el-tooltip__popper is-light {
-            background-color: rgb(255, 231, 147);
-        }
+    li:nth-child(1) {
+      float: left;
     }
-
-    .comparison {
-        overflow: hidden;
-        li {
-            float: right;
-            margin-left: 15px;
-            overflow: hidden;
-            p {
-                text-align: center;
-                color: rgb(55, 34, 255);
-            }
-        }
-
-        li:nth-child(1) {
-            float: left;
-        }
-    }
-    .highcharts-root{
-        max-height: 320px!important;
-    }
-    .highcharts-container{
-        height: 320px;
-    }
+  }
+  .highcharts-root{
+    max-height: 320px!important;
+  }
+  .highcharts-container{
+    height: 320px;
+  }
 </style>

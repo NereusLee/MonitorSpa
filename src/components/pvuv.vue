@@ -7,7 +7,7 @@
         </el-row>
             <div id="charts">
                 <el-row :gutter="40">
-                <el-col :span="12" v-for="(x,index) in list">
+                <el-col :span="12" v-for="(x,index) in list" :key="index">
                         <chart :id="ids[index]"
                                :option="x.option"
                                :describe="describe[index]"
@@ -18,83 +18,83 @@
     </div>
 </template>
 <script>
-    function GetDateStr(AddDayCount) {
-        var dd = new Date();
-        dd.setDate(dd.getDate() + AddDayCount);//获取AddDayCount天后的日期
-        var y = dd.getFullYear();
-        var m = (dd.getMonth() + 1) < 10 ? "0" + (dd.getMonth() + 1) : (dd.getMonth() + 1);//获取当前月份的日期，不足10补0
-        var d = dd.getDate() < 10 ? "0" + dd.getDate() : dd.getDate();//获取当前几号，不足10补0
-        return '' + y + m + d;
+import {mapState, mapActions, mapMutations} from 'vuex'
+// 导入chart组件
+import chart from '@/plug/Chart.vue'
+import checkBox from '@/components/checkbox'
+import QueryCondition from '@/plug/QueryCondition'
+import axios from 'axios'
+function GetDateStr (AddDayCount) {
+  var dd = new Date()
+  dd.setDate(dd.getDate() + AddDayCount)// 获取AddDayCount天后的日期
+  var y = dd.getFullYear()
+  var m = (dd.getMonth() + 1) < 10 ? '0' + (dd.getMonth() + 1) : (dd.getMonth() + 1)// 获取当前月份的日期，不足10补0
+  var d = dd.getDate() < 10 ? '0' + dd.getDate() : dd.getDate()// 获取当前几号，不足10补0
+  return '' + y + m + d
+}
+const log = console.log.bind(this)
+export default {
+  name: 'app',
+  data () {
+    return {
+      list: [],
+      describe: ['图文PV', '图文UV', '视频UV', '视频PV'],
+      title: ['图文PV', '图文UV', '视频UV', '视频PV'],
+      ids: ['articlepv', 'articleuv', 'videouv', 'videovv']
+      // first:true  //初次加载
     }
-    const log = console.log.bind(this)
-    import {mapState, mapActions, mapMutations} from 'vuex'
-    // 导入chart组件
-    import chart from '@/plug/Chart.vue'
-    import checkBox from '@/components/checkbox'
-    import QueryCondition from '@/plug/QueryCondition'
-    import axios from 'axios'
-    export default {
-        name: 'app',
-        data() {
-            return {
-                list: [],
-                describe: ['图文PV', '图文UV','视频UV','视频PV'],
-                title: ['图文PV', '图文UV','视频UV','视频PV'],
-                ids:['articlepv','articleuv','videouv','videovv']
-                // first:true  //初次加载
-            }
-        },
-        components: {
-            QueryCondition,
-            chart,
-            checkBox,
-            Date
-        },
-        computed: {
-            ...mapState(['startingMode', 'channelsData']),
-            StartingMode() {
-                return this.startingMode
-            },
-            ChannelsData() {
-                return this.channelsData
-            }
-        },
-        watch: {
-            StartingMode(n) {
-                this.list = this.startingMode
-            },
-            ChannelsData(n) {
-                this.list = this.channelsData
-            },
-            $route(m) {
-                let n = m.params.id
-                this.repaint(n)
-            }
-        },
-        methods: {
-            ...mapActions(['getStartingMode', 'getChannelsData']),
-            repaint(n) {
-                if (n == 'startStyle') {
-                    let seDate = [GetDateStr(-7),GetDateStr(-1)]
-                    this.getStartingMode(seDate).then(()=>{
-                      this.list = this.startingMode
-                    })
-                } else if (n == 'channel') {
-                    this.getChannelsData().then(()=>{
-                      this.list = this.channelsData
-                    })
-                    // this.first = false
-                    // this.list = this.channelsData
-                }
-            }
-        },
-        async created() {
-            let n = this.$route.params.id
-            this.repaint(n)
-            let res =await axios('http://test.lg.webdev.com/accesslayer/InewsQuality/getConnTrend')
-            console.log(res)
-        }
+  },
+  components: {
+    QueryCondition,
+    chart,
+    checkBox,
+    Date
+  },
+  computed: {
+    ...mapState(['startingMode', 'channelsData']),
+    StartingMode () {
+      return this.startingMode
+    },
+    ChannelsData () {
+      return this.channelsData
     }
+  },
+  watch: {
+    StartingMode (n) {
+      this.list = this.startingMode
+    },
+    ChannelsData (n) {
+      this.list = this.channelsData
+    },
+    $route (m) {
+      let n = m.params.id
+      this.repaint(n)
+    }
+  },
+  methods: {
+    ...mapActions(['getStartingMode', 'getChannelsData']),
+    repaint (n) {
+      if (n == 'startStyle') {
+        let seDate = [GetDateStr(-7), GetDateStr(-1)]
+        this.getStartingMode(seDate).then(() => {
+          this.list = this.startingMode
+        })
+      } else if (n == 'channel') {
+        this.getChannelsData().then(() => {
+          this.list = this.channelsData
+        })
+        // this.first = false
+        // this.list = this.channelsData
+      }
+    }
+  },
+  async created () {
+    let n = this.$route.params.id
+    this.repaint(n)
+    let res = await axios('http://test.lg.webdev.com/accesslayer/InewsQuality/getConnTrend')
+    console.log(res)
+  }
+}
 
 </script>
 <style lang="scss" scoped>

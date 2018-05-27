@@ -8,7 +8,7 @@
     <!--<router-link to='/pvuv/channel'>Channel</router-link><br />-->
     <!--<router-link to='/monitor/news'>monitor news</router-link>-->
     <!--<router-link to='/monitor/kuaibao'>monitor kuaibao</router-link><br />-->
-    <router-view></router-view>
+    <router-view :key="$route.fullpath"></router-view>
   </div>
 </template>
 

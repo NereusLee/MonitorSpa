@@ -16,16 +16,16 @@
                 当前({{time}})
             </li>
             <li>
-                <p :style="{color:compare[1].color}">
-                    <Icon :type="compare[1].icon"></Icon>
-                    {{compare[1].data}}
+                <p >
+                  <Icon :style="{color:compare[1].color}" :type="compare[1].icon"></Icon>
+                  <span :style="{color:compare[1].color}">{{compare[1].data}}</span>
                 </p>
                 相比七天前
             </li>
             <li>
-                <p :style="{color:compare[0].color}">
-                    <Icon :type="compare[0].icon"></Icon>
-                    {{compare[0].data}}
+                <p >
+                    <Icon :style="{color:compare[0].color}" :type="compare[0].icon"></Icon>
+                    <span :style="{color:compare[0].color}">{{compare[0].data}}</span>
                 </p>
                 相比一天前
             </li>
@@ -83,7 +83,7 @@ export default {
       type: Object
     },
     compareToBig: {
-      type: Object
+      // type: Object
     }
   },
   components: {
@@ -97,7 +97,7 @@ export default {
       compare: [],
       time: '',
       current: 0, // 初始值
-      optionBig: {},
+      optionBig: {},//用来传给大图的值
       monitorData: {},
       compareData: []
     }
@@ -131,11 +131,11 @@ export default {
     reflash () {
       this.id = randomString(4)
       this.time = this.now()
-      // this.compareInit()
+      this.compareInit()
       this.getMonitorData().then(() => { // 保证在compareInit执行时this.compareData有值
-        this.compareInit()
         this.$nextTick(() => {
-          this.title = this.monitorData.option.title
+          this.compareInit()
+          this.title = this.monitorData.option.title // 保留完整标题便于之后正则匹配
           this.title2 = this.monitorData.option.title.split(' ')[2]
           let opt = this.monitorData.option
           let optObj = this.showChart(
@@ -149,7 +149,7 @@ export default {
       })
     },
     compareInit () {
-      let arr = this.compareData
+      let arr = this.option.compareData?this.option.compareData:this.compareData
       let day = comparison(arr[0], arr[1])
       let week = comparison(arr[0], arr[2])
       this.compare = [
@@ -195,9 +195,9 @@ export default {
       let res
       let url = `http://test.lg.webdev.com/accesslayer/NewsMonitorAccesslayer/GetThreeDailyData?type=1&mixid=${ids.mixid}&attrid=${ids.attrid}`
       try {
-        res=await axios(url)
+        // res=await axios(url)
 
-        // res = await axios('https://api.myjson.com/bins/q8rni')
+        res = await axios('https://api.myjson.com/bins/q8rni')
       } catch (e) {
         res = {}
       }
@@ -249,7 +249,7 @@ export default {
               let container = this.container
               let width = $(container).width()
               let height = Math.min(0.92 * width, 350) + 'px'
-              if(0.92*width<330) height = '330px'
+              if (0.92 * width < 330) height = '330px'
               $(this.container).height(height)
               $(container).children('.highcharts-root').height(height)
             }
@@ -281,7 +281,7 @@ export default {
         },
         series: series,
 
-        getThis: () => {
+        getThis: () => {  //获取当前vue的this
           return this
         },
         tooltip: {
@@ -330,12 +330,18 @@ export default {
     if (this.initFlag !== true) {
       this.reflash()
     } else {
+      log(this.option)
+      this.compareInit()
+      // this.compare = n.arr
+      // this.time = n.time
+      // this.current = n.current
       this.id = randomString(4)
       this.title2 = this.option.title
       this.monitorData.describe = this.option.des
-      this.compareData = this.option.compareData
-      this.compareInit()
       this.$nextTick(() => {
+        // log(this.compareToBig)
+        // this.compareInit()
+        this.compareData = this.option.compareData
         Highcharts.chart(this.id, this.option.opt)
       })
     }

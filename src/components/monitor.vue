@@ -23,10 +23,11 @@
                             @compareFromBig="compareFromBig"
                     ></chart2>
                 </el-col>
+                <!--质量接口-->
                 <el-col :span="8" v-for="(x,index) in qualityList" :key="x">
                     <quality-chart
                             style="max-height: 430px"
-                            :list="x"
+                            :option="x"
                     ></quality-chart>
                 </el-col>
             </el-row>
@@ -55,9 +56,11 @@ export default {
           {mixid: 7997, attrid: 463214, title: '快报 golang接入层 内搜推荐兜底数'},
           {mixid: 7997, attrid: 456035, title: '快报 golang接入层 请求总量'},
           {mixid: 7997, attrid: 455985, title: '快报 golang接入层 请求成功量'},
-          {mixid: 7997, attrid: 475112, title: '快报 golang接入层 推荐条数少于请求条数'}
+          {mixid: 7997, attrid: 475112, title: '快报 golang接入层 推荐条数少于请求条数'},
+          {title: 'APP质量'}
         ],
-        menuList: ['接入层']
+        qualityList: ['num','avg_response','percent95'], //质量 metric 质量指标 num 请求量，avg_response 平均耗时， percent95 95分位耗时
+        menuList: ['接入层','APP质量']
       },
       news: {
         list: [
@@ -67,9 +70,9 @@ export default {
           {mixid: 8891, attrid: 484452, title: '新闻 接入层 二级频道推荐兜底调用量'},
           {mixid: 7383, attrid: 435498, title: '新闻 push推送 地域推送数请求总量'}
         ],
-        menuList: ['接入层', 'push']
+        qualityList: ['num','avg_response','percent95'], //质量 metric 质量指标 num 请求量，avg_response 平均耗时， percent95 95分位耗时
+        menuList: ['接入层', 'push','APP质量']
       },
-      qualityList: ['num','avg_response','percent95'], //质量 metric 质量指标 num 请求量，avg_response 平均耗时， percent95 95分位耗时
       describe: '',
       id: 'asd',
       option: {},
@@ -84,6 +87,10 @@ export default {
     menuList () {
       let ids = this.$route.params.type == 'kuaibao' ? this.kuaibao : this.news
       return ids.menuList
+    },
+    qualityList(){
+      let ids = this.$route.params.type == 'kuaibao' ? this.kuaibao : this.news
+      return ids.qualityList
     }
   },
   watch: {
@@ -112,7 +119,7 @@ export default {
     }
 
   },
-  async created () {
+  created () {
     this.switchCarts('接入层')
   }
 }
