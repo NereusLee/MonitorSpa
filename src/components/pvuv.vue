@@ -1,5 +1,8 @@
 <template>
     <div id="pvuv">
+        <div id="loading" v-show="loading">
+            <img src="@/assets/loading.gif" alt="">
+        </div>
         <el-row style="margin-left: 17px;">
             <el-col :span="24">
                 <query-condition :rou="this.$route.params.id"></query-condition>
@@ -51,7 +54,7 @@ export default {
     Date
   },
   computed: {
-    ...mapState(['startingMode', 'channelsData']),
+      ...mapState(['startingMode', 'channelsData','loading']),
     StartingMode () {
       return this.startingMode
     },
@@ -91,8 +94,6 @@ export default {
   async created () {
     let n = this.$route.params.id
     this.repaint(n)
-    let res = await axios('http://test.lg.webdev.com/accesslayer/InewsQuality/getConnTrend')
-    console.log(res)
   }
 }
 
@@ -101,6 +102,23 @@ export default {
     #pvuv{
         padding-top: 9px;
         padding-left: 20px;
+        #loading{
+            width: 100%;
+            height: 100%;
+            background-color: #fff;
+            opacity: 0.7;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 5;
+        }
+        #loading>img{
+            position: absolute;
+            top: 50%;
+            left: 55%;
+            transform: translate(-50%, -50%);
+        }
+
     }
     #charts {
         list-style-type: none;

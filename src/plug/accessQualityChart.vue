@@ -1,14 +1,16 @@
 <template>
   <div class="chart-body" :option="option">
+    <Spin size="large" fix v-if="loading"></Spin>
+    <div class="error" v-if="error"><p>网络请求错误或超时!</p></div>
     <div class="chart-head">
       <!--介绍文字和图标-->
-      <el-tooltip class="item" effect="light" content="qualityData.describe" placement="right-start">
+      <el-tooltip class="item" effect="light" :content="option" placement="right-start">
         <el-button class='el-but'>
           <Icon type="information-circled"></Icon>
         </el-button>
       </el-tooltip>
-      <div class="headTitle">{{title}}</div>
-      <Icon :type="rightTopIcon.type" ></Icon>
+      <div class="headTitle">接入层整体{{title}}</div>
+      <Icon type="arrow-expand" @click="linkTo" ></Icon>
     </div>
     <ul class="comparison" v-if="compare">
       <li>
@@ -36,9 +38,9 @@
   </div>
 </template>
 <script>
-import Highcharts from 'highcharts'
-import $ from 'jquery'
-import {Icon} from 'iview'
+// import Highcharts from 'highcharts'
+// import $ from 'jquery'
+import {Icon, Spin} from 'iview'
 import {mapState} from 'vuex'
 import axios from 'axios'
 
@@ -84,10 +86,13 @@ export default {
     },
     compareToBig: {
       // type: Object
+    },
+    queryMethod: {
+      type: String
     }
   },
   components: {
-    Icon
+    Icon, Spin
   },
   data () {
     return {
@@ -100,7 +105,14 @@ export default {
       optionBig: {}, // 用来传给大图的值
       qualityData: {},
       compareData: [],
-      first: true // 用于判断数据是否第一次更新
+      first: true, // 用于判断数据是否第一次更新
+      loading: false,
+      error: false,
+      CName: {
+        num: '请求量',
+        avg_response_time: '平均耗时',
+        percent95: '95分位耗时'
+      }
     }
   },
   watch: {
@@ -111,10 +123,13 @@ export default {
     },
     option (n) {
       this.reflash()
+    },
+    $route () {
+      this.reflash()
     }
   },
   computed: {
-    rightTopIcon () {
+    expandIcon () {
       if (this.initFlag) {
         return {
           type: 'close-round',
@@ -131,11 +146,19 @@ export default {
   methods: {
     reflash () {
       this.time = this.now()
-      this.title = this.option
+      this.title = this.CName[this.option]
       this.compareInit()
       this.getQualityData().then(() => { // 保证在compareInit执行时this.compareData有值
         this.$nextTick(() => {
           this.compareInit()
+          let opt = this.qualityData.option
+          let optObj = this.showChart(
+            opt.series,
+            opt.categories,
+            opt.title,
+            opt.type
+          )
+          Highcharts.chart(this.id, optObj)
         })
       })
     },
@@ -161,10 +184,10 @@ export default {
       let myDate = new Date()
       let hour = myDate.getHours()
       let min = myDate.getMinutes()
-      if (min < 5) {
-        return `${(hour - 1)}:${min + 55}`
+      if (min < 10) {
+        return `${(hour - 1)}:${min + 50}`
       }
-      return `${hour}:${min - 5}`
+      return `${hour}:${min - 10}`
     },
     getDataNow (num) { // 拿到当前时间在后台数据中对应的序号
       let myDate = new Date()
@@ -175,36 +198,47 @@ export default {
       }
       return hour * 60 + min - num
     },
+    linkTo () {
+      let host = window.location.host
+      // let host = 'http://test.lg.webdev.com'
+      let baseUrl = `http://${host}/accesslayer/${this.queryMethod}/`
+      let type = this.$route.params.type == 'kuaibao' ? 'cnewscode' : 'inewscode'
+      window.location.href = baseUrl + type + `?metric=${this.option}`
+    },
     closeIt () {
       this.$emit('closeIt')
     },
     async getQualityData () {
+      this.loading = true
       let options = this.option
-      let index = this.getDataNow(5) // 以当前时间的五分钟前为序号
+      let index = this.getDataNow(10) // 以当前时间的五分钟前为序号
       let res
-      // let url = `http://test.lg.webdev.com/accesslayer/NewsMonitorAccesslayer/GetThreeDailyData?type=1&mixid=${ids.mixid}&attrid=${ids.attrid}`
+      let url = `/accesslayer/${this.queryMethod}/getConnTrend?metric=${options}&etime=23:59`
+      axios.defaults.timeout = 60000
       try {
-        // res=await axios(url)
-
-        res = await axios('https://api.myjson.com/bins/hsv7y')
+        res = await axios(url)
+        // res = await axios('https://api.myjson.com/bins/q8rni')
       } catch (e) {
         res = {}
+        this.error = true
       }
+      this.loading = false
+
       let obj = {
         title: options[3],
         data: res.data,
         mixid: options.mixid,
         attrid: options.attrid
       }
-      this.changequalityData(obj)
+      this.changeQualityData(obj)
 
       let array = [] // 存放当前时间的值
       res.data.data.forEach((value, num) => {
-        array[num] = value.data[617] // 暂时设数字
+        array[num] = value.data[index]
       })
       this.compareData = array
     },
-    changequalityData (obj) {
+    changeQualityData (obj) {
       if (obj.data) {
         let series = obj.data.data
         let categories = obj.data.categories
@@ -258,6 +292,9 @@ export default {
         plotOptions: {
           column: {
             colorByPoint: true
+          },
+          series: {
+            lineWidth: 1
           }
         },
         series: series,
@@ -271,14 +308,14 @@ export default {
           formatter: function () {
             let that = opt.getThis()
             let points = this.points
-            let s = `<p>${points[2].x}</p>`
+            let s = `<p>${points[0].x}</p>`
             let words = ['当前时间', '一天前', '七天前']
             $.each(points, function (i, v) {
               s += `<span style="font-weight:bold;color:#7a85a2;display: block;">${words[i]}: ${v.point.y} </span>`
-              that.$data.time = points[2].x
+              that.$data.time = points[0].x
             })
-            let day = comparison(points[2].y, points[0].y)
-            let week = comparison(points[2].y, points[1].y)
+            let day = comparison(points[0].y, points[1].y)
+            let week = comparison(points[0].y, points[2].y)
             let arr = [
               {
                 icon: day.icon,
@@ -292,7 +329,7 @@ export default {
               }
             ]
             that.$data.compare = arr
-            that.$data.current = points[2].y
+            that.$data.current = points[0].y
             return s
           },
           useHTML: true
@@ -321,24 +358,20 @@ export default {
   },
   updated () {
     if (this.first) {
-      this.$nextTick(() => {
-        let opt = this.qualityData.option
-        let optObj = this.showChart(
-          opt.series,
-          opt.categories,
-          opt.title,
-          opt.type
-        )
-        Highcharts.chart(this.id, optObj)
-      })
       this.first = false
     }
-  },
+  }
 }
 
 </script>
 
 <style lang="scss" scoped>
+  @mixin center() {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
   .chart-body {
     width: 100%;
     margin: 0 auto 35px;
@@ -346,17 +379,26 @@ export default {
     padding: 0 18px 0 0;
     max-height: 433px;
     overflow: hidden;
+    position: relative;
+    .error{
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      z-index: 6;
+      text-align: center;
+      align-items:center;
+      line-height: 100%;
+      background-color: rgba(60,63,65,0.6);
+      color:#ccc;
+      p{
+        font-size: 14px;
+        @include center();
+      }
+    }
   }
 
   .x-bar {
     border: none;
-  }
-
-  @mixin center() {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
   }
 
   .chart-head {
@@ -372,11 +414,15 @@ export default {
       display: inline-block;
       line-height: 50px;
       font-weight: 800;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     .ivu-icon-arrow-expand {
       font-size: 18px;
       color: rgb(43, 133, 228);
-      float: right;
+      float: left;
+      position: relative;
+      left: 2px;
       line-height: 50px;
     }
     .ivu-icon-close-round {

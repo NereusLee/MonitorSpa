@@ -1,17 +1,16 @@
 <template>
     <div class="chart-body" :option="option">
-        <div class="error" v-if="error"><p>网络请求错误或超时!</p></div>
         <Spin size="large" fix v-if="loading"></Spin>
+        <div class="error" v-if="error"><p>网络请求错误或超时!</p></div>
         <div class="chart-head">
             <!--介绍文字和图标-->
-            <el-tooltip class="item" effect="light" :content="monitorData.describe" placement="right-start">
+            <el-tooltip class="item" effect="light" content="qualityData.describe" placement="right-start">
                 <el-button class='el-but'>
                     <Icon type="information-circled"></Icon>
                 </el-button>
             </el-tooltip>
-            <Icon :type="expandIcon.type" @click="expandIcon.method"></Icon>
-            <div class="headTitle">{{title2}}</div>
-
+            <div class="headTitle">{{title}}总体耗时(95分位)</div>
+            <Icon type="arrow-expand" @click="linkTo"></Icon>
         </div>
         <ul class="comparison" v-if="compare">
             <li>
@@ -20,8 +19,8 @@
             </li>
             <li>
                 <p >
-                  <Icon :style="{color:compare[1].color}" :type="compare[1].icon"></Icon>
-                  <span :style="{color:compare[1].color}">{{compare[1].data}}</span>
+                    <Icon :style="{color:compare[1].color}" :type="compare[1].icon"></Icon>
+                    <span :style="{color:compare[1].color}">{{compare[1].data}}</span>
                 </p>
                 相比七天前
             </li>
@@ -39,8 +38,8 @@
     </div>
 </template>
 <script>
-import Highcharts from 'highcharts'
-import $ from 'jquery'
+// import Highcharts from 'highcharts'
+// import $ from 'jquery'
 import {Icon, Spin} from 'iview'
 import {mapState} from 'vuex'
 import axios from 'axios'
@@ -101,10 +100,12 @@ export default {
       time: '',
       current: 0, // 初始值
       optionBig: {}, // 用来传给大图的值
-      monitorData: {},
+      qualityData: {},
       compareData: [],
+      first: true, // 用于判断数据是否第一次更新
       loading: false,
       error: false
+
     }
   },
   watch: {
@@ -134,29 +135,19 @@ export default {
   },
   methods: {
     reflash () {
-      this.id = randomString(4)
       this.time = this.now()
+      this.title = this.option.title
       this.compareInit()
-      this.getMonitorData().then(() => { // 保证在compareInit执行时this.compareData有值
+      this.getQualityData().then(() => { // 保证在compareInit执行时this.compareData有值
         this.$nextTick(() => {
           this.compareInit()
-          this.title = this.monitorData.option.title // 保留完整标题便于之后正则匹配
-          this.title2 = this.monitorData.option.title.split(' ')[2]
-          let opt = this.monitorData.option
-          let optObj = this.showChart(
-            opt.series,
-            opt.categories,
-            opt.title,
-            opt.type
-          )
-          Highcharts.chart(this.id, optObj)
         })
       })
     },
-    compareInit () {
-      let arr = this.option.compareData ? this.option.compareData : this.compareData
-      let day = comparison(arr[0], arr[1])
-      let week = comparison(arr[0], arr[2])
+    compareInit () { // 数据给的是昨天,一周前,今天
+      let arr = this.compareData
+      let day = comparison(arr[2], arr[0])
+      let week = comparison(arr[2], arr[1])
       this.compare = [
         {
           icon: day.icon,
@@ -169,7 +160,7 @@ export default {
           color: week.color
         }
       ]
-      this.current = arr[0]
+      this.current = arr[2]
     },
     now () {
       let myDate = new Date()
@@ -180,6 +171,14 @@ export default {
       }
       return `${hour}:${min - 5}`
     },
+    GetDateStr (AddDayCount) {
+      var dd = new Date()
+      dd.setDate(dd.getDate() + AddDayCount)// 获取AddDayCount天后的日期
+      var y = dd.getFullYear()
+      var m = (dd.getMonth() + 1) < 10 ? '0' + (dd.getMonth() + 1) : (dd.getMonth() + 1)// 获取当前月份的日期，不足10补0
+      var d = dd.getDate() < 10 ? '0' + dd.getDate() : dd.getDate()// 获取当前几号，不足10补0
+      return `${y}-${m}-${d}`
+    },
     getDataNow (num) { // 拿到当前时间在后台数据中对应的序号
       let myDate = new Date()
       let hour = myDate.getHours()
@@ -189,61 +188,61 @@ export default {
       }
       return hour * 60 + min - num
     },
+    linkTo () {
+      let platform = this.title.split(' ')[0].match(/[a-z]+/)[0]
+      let host = window.location.host
+      // let host = 'http://test.lg.webdev.com'
+      let url = `http://${host}/accesslayer/${this.option.param.link}/?platform=${platform}`
+      window.location.href = url
+    },
     closeIt () {
       this.$emit('closeIt')
     },
-    async getMonitorData () { // 监视器数据
-      // context.commit('changeLoading')
+    async getQualityData () {
       this.loading = true
-      let ids = this.option
-      var chartArr = []
+      let options = this.option
+      let param = options.param
       let index = this.getDataNow(5) // 以当前时间的五分钟前为序号
       let res
-      let url = `/accesslayer/NewsMonitorAccesslayer/GetThreeDailyData?type=1&mixid=${ids.mixid}&attrid=${ids.attrid}`
-      axios.defaults.timeout =  60000
+      let url = `/appnews/News99_95/GetThreedailyCmpData?appid=${param.appid}&t_type=${param.t_type}&uri=${param.uri}&code=1000&sdate=${this.GetDateStr(0)}&stime=00:00&etime=23:59&edate=${this.GetDateStr(-1)}&data_type=${param.data_type}&pushmark=${param.pushmark}`
+      axios.defaults.timeout = 60000
       try {
         res = await axios(url)
         // res = await axios('https://api.myjson.com/bins/q8rni')
       } catch (e) {
         res = {}
         this.error = true
+        log(this.loading)
       }
       this.loading = false
       let obj = {
-        title: ids.title,
+        title: options[3],
         data: res.data,
-        mixid: ids.mixid,
-        attrid: ids.attrid
+        mixid: options.mixid,
+        attrid: options.attrid
       }
-      this.changeMonitorData(obj)
+      this.changeQualityData(obj)
+
       let array = [] // 存放当前时间的值
       res.data.data.forEach((value, num) => {
         array[num] = value.data[index]
       })
       this.compareData = array
     },
-    changeMonitorData (obj) {
+    changeQualityData (obj) {
       if (obj.data) {
         let series = obj.data.data
         let categories = obj.data.categories
-        this.monitorData = {
+        this.qualityData = {
           option: {
             series,
             categories,
-            title: obj.title,
+            // title: this.option,
             type: 'line'
-          },
-          describe: `视图ID为${obj.mixid},属性ID为${obj.attrid}`
+          }
+          // describe: `视图ID为${obj.mixid},属性ID为${obj.attrid}`
         }
       }
-    },
-    expand () { // 放大效果
-      this.$emit('expand', {
-        opt: this.optionBig,
-        title: this.title2,
-        des: this.monitorData.describe,
-        compareData: this.compareData
-      })
     },
     showChart (series, categories, title, chartType) {
       let that = this
@@ -321,11 +320,6 @@ export default {
               }
             ]
             that.$data.compare = arr
-            that.$emit('compareFromBig', {
-              arr,
-              time: points[0].x,
-              current: points[0].y
-            }) // expand函数传过去时,that指向的还是原来小图的vue实例,因此只能手动再把compare的数值传过去
             that.$data.current = points[0].y
             return s
           },
@@ -337,23 +331,36 @@ export default {
     }
   },
   created () {
+    // log(this.option, this.option.param.uri)
     if (this.initFlag !== true) {
+      this.id = randomString(4)
       this.reflash()
     } else {
-      log(this.option)
       this.compareInit()
-      // this.compare = n.arr
-      // this.time = n.time
-      // this.current = n.current
       this.id = randomString(4)
       this.title2 = this.option.title
-      this.monitorData.describe = this.option.des
+      this.qualityData.describe = this.option.des
       this.$nextTick(() => {
         // log(this.compareToBig)
         // this.compareInit()
         this.compareData = this.option.compareData
         Highcharts.chart(this.id, this.option.opt)
       })
+    }
+  },
+  updated () {
+    if (this.first) {
+      this.$nextTick(() => {
+        let opt = this.qualityData.option
+        let optObj = this.showChart(
+          opt.series,
+          opt.categories,
+          opt.title,
+          opt.type
+        )
+        Highcharts.chart(this.id, optObj)
+      })
+      this.first = false
     }
   }
 }
@@ -457,9 +464,9 @@ export default {
         }
     }
     .highcharts-root{
-      max-height: 320px!important;
+        max-height: 320px!important;
     }
     .highcharts-container{
-      height: 320px;
+        height: 320px;
     }
 </style>

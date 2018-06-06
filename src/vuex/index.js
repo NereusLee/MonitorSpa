@@ -72,7 +72,7 @@ export default new Vuex.Store({
     async getStartingMode (context, date) { // 获取启动方式分组的数据
       context.commit('changeLoading') // 加载动画
       let arg = arguments[1] || [GetDateStr(-7), GetDateStr(-1)]
-      let url = `http://test.lg.webdev.com/accesslayer/NewsdailyPVUV/GetSimgleTrendChart?sdate=${arg[0]}&edate=${arg[1]}`
+      let url = `/accesslayer/NewsdailyPVUV/GetSimgleTrendChart?sdate=${arg[0]}&edate=${arg[1]}`
       let res = await axios(url)
       // let res = await axios('https://api.myjson.com/bins/zwdji')
       context.commit('changeStartingMode', res)
@@ -82,17 +82,11 @@ export default new Vuex.Store({
       let seDate = [GetDateStr(-7), GetDateStr(-1)]
       let arg = arguments[1] || {date: seDate, channel: `news_news_top,news_news_ent,news_news_finance,news_news_sports,news_news_tech,news_topic`}
       // console.log(arg.date[0])
-      let url = `http://test.lg.webdev.com/accesslayer/NewsdailyPVUV/GetChanelPvUvData?sdate=${arg.date[0]}&edate=${arg.date[1]}&channels=${arg.channel}`
+      let url = `/accesslayer/NewsdailyPVUV/GetChanelPvUvData?sdate=${arg.date[0]}&edate=${arg.date[1]}&channels=${arg.channel}`
       let data = await axios(url)
       // let data = await axios('https://api.myjson.com/bins/150pce')
       context.commit('changeChannelsData', data)
     },
-    async getQualityData (context) {
-      let res = await axios('https://api.myjson.com/bins/hsv7y') //新闻接入
-      await axios('https://api.myjson.com/bins/18fde6') //快报接入
-      await axios('https://api.myjson.com/bins/rr8ge') //
-
-    }
   },
   mutations: {
     changeCompareData (state, v) {

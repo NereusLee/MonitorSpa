@@ -8,26 +8,24 @@
 </template>
 
 <script>
-    // import { elCheckboxButton } from 'element-ui';
-    export default {
-        name: "checkbox",
-        components:{
-            // elCheckboxButton
-        },
-        data(){
-            return {
-                checkboxGroup1:'深圳',
-                checkboxGroup2:'深圳',
-                cities:['上海', '北京', '广州', '深圳'],
-                checked3:true
-            }
-        },
-        methods:{
-            show(n){
-                console.log(this.$router)
-            }
-        }
+export default {
+  name: 'checkbox',
+  components: {
+  },
+  data () {
+    return {
+      checkboxGroup1: '深圳',
+      checkboxGroup2: '深圳',
+      cities: ['上海', '北京', '广州', '深圳'],
+      checked3: true
     }
+  },
+  methods: {
+    show (n) {
+      console.log(this.$router)
+    }
+  }
+}
 </script>
 
 <style scoped>

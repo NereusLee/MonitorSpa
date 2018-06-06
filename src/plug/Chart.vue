@@ -13,7 +13,7 @@
   </div>
 </template>
 <script>
-import Highcharts from 'highcharts'
+// import Highcharts from 'highcharts'
 import {Icon} from 'iview'
 export default {
   // 验证类型
