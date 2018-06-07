@@ -202,8 +202,8 @@ export default {
       let url = `/accesslayer/NewsMonitorAccesslayer/GetThreeDailyData?type=1&mixid=${ids.mixid}&attrid=${ids.attrid}`
       axios.defaults.timeout =  60000
       try {
-        res = await axios(url)
-        // res = await axios('https://api.myjson.com/bins/q8rni')
+        // res = await axios(url)
+        res = await axios('https://api.myjson.com/bins/q8rni')
       } catch (e) {
         res = {}
         this.error = true
