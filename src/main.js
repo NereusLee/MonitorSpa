@@ -30,7 +30,6 @@ Vue.prototype.$showChart = showChart
 Vue.prototype.$axios = axios
 Vue.prototype.$log = console.log
 
-// Vue.use(ElementUI)
 
 new Vue({
   el: '#app',

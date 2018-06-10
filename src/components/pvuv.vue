@@ -1,7 +1,7 @@
 <template>
     <div id="pvuv">
         <div id="loading" v-show="loading">
-            <img src="@/assets/loading.gif" alt="">
+          <Spin size="large" fix v-if="loading"></Spin>
         </div>
         <el-row style="margin-left: 17px;">
             <el-col :span="24">
@@ -27,6 +27,10 @@ import chart from '@/plug/Chart.vue'
 import checkBox from '@/components/checkbox'
 import QueryCondition from '@/plug/QueryCondition'
 import axios from 'axios'
+// import { LOADIPHLPAPI } from 'dns';
+import { loadavg } from 'os';
+import {Spin} from 'iview'
+
 function GetDateStr (AddDayCount) {
   var dd = new Date()
   dd.setDate(dd.getDate() + AddDayCount)// 获取AddDayCount天后的日期
@@ -43,7 +47,8 @@ export default {
       list: [],
       describe: ['图文PV', '图文UV', '视频UV', '视频PV'],
       title: ['图文PV', '图文UV', '视频UV', '视频PV'],
-      ids: ['articlepv', 'articleuv', 'videouv', 'videovv']
+      ids: ['articlepv', 'articleuv', 'videouv', 'videovv'],
+      loading:true,
       // first:true  //初次加载
     }
   },
@@ -51,7 +56,8 @@ export default {
     QueryCondition,
     chart,
     checkBox,
-    Date
+    Date,
+    Spin
   },
   computed: {
       ...mapState(['startingMode', 'channelsData','loading']),
@@ -81,10 +87,12 @@ export default {
         let seDate = [GetDateStr(-7), GetDateStr(-1)]
         this.getStartingMode(seDate).then(() => {
           this.list = this.startingMode
+          this.loading = false
         })
       } else if (n == 'channel') {
         this.getChannelsData().then(() => {
           this.list = this.channelsData
+          this.loading = false
         })
         // this.first = false
         // this.list = this.channelsData
@@ -112,12 +120,12 @@ export default {
             left: 0;
             z-index: 5;
         }
-        #loading>img{
-            position: absolute;
-            top: 50%;
-            left: 55%;
-            transform: translate(-50%, -50%);
-        }
+        // #loading>img{
+        //     position: absolute;
+        //     top: 50%;
+        //     left: 55%;
+        //     transform: translate(-50%, -50%);
+        // }
 
     }
     #charts {
