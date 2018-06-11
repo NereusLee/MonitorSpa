@@ -10,38 +10,40 @@
 
         <div class="charts">
             <!--放大后的图表位置-->
-            <div class="bigBackground" v-if="showBig">
-                <div class="big-chart">
-                    <chart2
-                            :option="optionBig"
-                            :initFlag="true"
-                            @closeIt="closeIt"
-                            :compareToBig="compareToBig"
-                    ></chart2>
-                </div>
-            </div>
+            <!-- <div  class="bigBackground" > -->
+                <Modal 
+                v-model="showBig"
+                :width=80
+                >
+                  <div class="big-chart">
+                      <big-chart v-if="showBig" :handleAjaxData='handler'></big-chart>
+                    </div>
+                </Modal>
+            <!-- </div> -->
             <el-row :gutter="40">
                 <el-col
                         :span="8"
                         v-for="(x,index) in list"
                         :key="x.id"
                 >
-                    <chart2 style="max-height: 430px"
+                    <chart2 style="max-height: 370px"
                             :option="x"
                             :initFlag="false"
                             @expand="bigger"
                             @compareFromBig="compareFromBig"
                             v-if="menuSelection=='接入层'||menuSelection=='push'"
+                            :handleAjaxData='handler'
                     ></chart2>
 
                 </el-col>
                 <!--接入层质量接口-->
                 <el-col :span="8" v-for="(x,index) in accessQualityList.metric" :key="x">
                     <accessQuality-chart
-                            style="max-height: 430px"
+                            style="max-height: 370px"
                             :option="x"
                             :queryMethod="accessQualityList.queryMethod"
                             v-if="menuSelection=='接入层'"
+                            :handleAjaxData='handler'
                     ></accessQuality-chart>
                 </el-col>
                 <el-col
@@ -49,7 +51,7 @@
                         :span="8" v-for="(x,index) in appQualityList"
                         :key="index">
                     <appQuality-chart
-                            style="max-height: 430px"
+                            style="max-height: 370px"
                             :option = 'x'
                     ></appQuality-chart>
                 </el-col>
@@ -62,16 +64,17 @@
 import {mapActions, mapState} from 'vuex'
 import chart2 from '@/plug/Chart2'
 import myMenu from '@/plug/myMenu'
-import {Button} from 'iview'
+import {Button,Modal} from 'iview'
 import accessQualityChart from '@/plug/accessQualityChart'
 import appQualityChart from '@/plug/appQualityChart'
+import bigChart from '@/plug/bigChart'
 
 const log = console.log.bind(this)
 
 export default {
   name: 'monitor',
   components: {
-    Button, myMenu, chart2, accessQualityChart, appQualityChart
+    Button, myMenu, chart2, accessQualityChart, appQualityChart,Modal,bigChart
   },
   data () {
     return {
@@ -157,7 +160,22 @@ export default {
       optionBig: {},
       compareToBig: [],
       list: '',
-      menuSelection: '接入层'
+      menuSelection: '接入层',
+      handler:function (data) {
+        return data.categories.map((element, index) => {
+          let obj = {};
+          data.data.forEach((item, key) => {
+            let obj2 = {
+              time: element
+            };
+            obj2[item.name.replace(/\d+\-0/, "").replace(/\-/, "月") + "日"] =
+              item.data[index];
+            obj = { ...obj, ...obj2 };
+          });
+          // chartData=[...chartData,...arr]
+          return obj;
+        });
+      },
     }
   },
   computed: {
@@ -226,7 +244,6 @@ export default {
     },
     bigger (opt) {
       this.showBig = true
-      this.optionBig = opt
     },
     closeIt () {
       this.showBig = false

@@ -139,7 +139,7 @@ export default {
         data:chartData, // !!! 注意是原始数据，不要传入 dv
         xAxis: "time",
         yAxis: "value",
-        background:'black',
+        height:32,
         onChange: ({ startText, endText }) => {
           // !!! 更新状态量
           ds.setState("start", startText);

@@ -38,11 +38,13 @@
   </div>
 </template>
 <script>
-// import Highcharts from 'highcharts'
-// import $ from 'jquery'
+import Highcharts from 'highcharts'
+import $ from 'jquery'
 import {Icon, Spin} from 'iview'
 import {mapState} from 'vuex'
 import axios from 'axios'
+import G2 from "@antv/g2";
+import DataSet from "@antv/data-set";
 
 const log = console.log.bind(this)
 
@@ -89,7 +91,8 @@ export default {
     },
     queryMethod: {
       type: String
-    }
+    },
+    handleAjaxData:{}
   },
   components: {
     Icon, Spin
@@ -102,7 +105,6 @@ export default {
       compare: [],
       time: '',
       current: 0, // 初始值
-      optionBig: {}, // 用来传给大图的值
       qualityData: {},
       compareData: [],
       first: true, // 用于判断数据是否第一次更新
@@ -116,11 +118,6 @@ export default {
     }
   },
   watch: {
-    compareToBig (n) {
-      this.compare = n.arr
-      this.time = n.time
-      this.current = n.current
-    },
     option (n) {
       this.reflash()
     },
@@ -152,13 +149,7 @@ export default {
         this.$nextTick(() => {
           this.compareInit()
           let opt = this.qualityData.option
-          let optObj = this.showChart(
-            opt.series,
-            opt.categories,
-            opt.title,
-            opt.type
-          )
-          Highcharts.chart(this.id, optObj)
+          this.showChart(opt.data)
         })
       })
     },
@@ -216,8 +207,8 @@ export default {
       let url = `/accesslayer/${this.queryMethod}/getConnTrend?metric=${options}&etime=23:59`
       axios.defaults.timeout = 60000
       try {
-        res = await axios(url)
-        // res = await axios('https://api.myjson.com/bins/q8rni')
+        // res = await axios(url)
+        res = await axios('https://api.myjson.com/bins/q8rni')
       } catch (e) {
         res = {}
         this.error = true
@@ -240,121 +231,101 @@ export default {
     },
     changeQualityData (obj) {
       if (obj.data) {
-        let series = obj.data.data
-        let categories = obj.data.categories
         this.qualityData = {
-          option: {
-            series,
-            categories,
-            title: this.option,
-            type: 'line'
-          }
+           option: {
+            data: obj.data,
+            title: obj.title,
+            type: "line"
+          },
           // describe: `视图ID为${obj.mixid},属性ID为${obj.attrid}`
         }
       }
     },
-    showChart (series, categories, title, chartType) {
-      let that = this
-      let opt = {
-        chart: {
-          type: chartType, // 指定图表的类型，默认是折线图（line）
-          zoomType: 'x',
-          events: {
-            redraw: function () {
-              let container = this.container
-              let width = $(container).width()
-              let height = Math.min(0.92 * width, 350) + 'px'
-              if (0.92 * width < 330) height = '330px'
-              $(this.container).height(height)
-              $(container).children('.highcharts-root').height(height)
-            }
-          }
-        },
-        colors: ['#7070FF', '#FF5757', '#6AFF6A'],
-        credits: {
-          enabled: false
-        }, // 去掉地址
-        title: {
-          text: '' // 指定图表标题
-        },
-        xAxis: {
-          categories: categories, // 指定x轴分组
-          labels: {
-            rotation: 0// 调节倾斜角度偏移
-          }
-        },
-        yAxis: {
-          title: {
-            text: '' // 指定y轴的标题
+    showChart (data) {
+      let names = [];
+      data.data.forEach(item => {
+        names.push(item.name.replace(/\d+\-0/, "").replace(/\-/, "月") + "日");
+      });
+      let chartData = this.handleAjaxData(data);
+      this.optionBig = chartData
 
-          }
-        },
-        plotOptions: {
-          column: {
-            colorByPoint: true
-          },
-          series: {
-            lineWidth: 1
-          }
-        },
-        series: series,
+      const ds = new DataSet();
+      const dv = ds.createView().source(chartData);
 
-        getThis: () => { // 获取当前vue的this
-          return this
-        },
-        tooltip: {
-          shared: true,
-          // valueSuffix: '分',
-          formatter: function () {
-            let that = opt.getThis()
-            let points = this.points
-            let s = `<p>${points[0].x}</p>`
-            let words = ['当前时间', '一天前', '七天前']
-            $.each(points, function (i, v) {
-              s += `<span style="font-weight:bold;color:#7a85a2;display: block;">${words[i]}: ${v.point.y} </span>`
-              that.$data.time = points[0].x
-            })
-            let day = comparison(points[0].y, points[1].y)
-            let week = comparison(points[0].y, points[2].y)
-            let arr = [
-              {
-                icon: day.icon,
-                data: day.data,
-                color: day.color
-              },
-              {
-                icon: week.icon,
-                data: week.data,
-                color: week.color
-              }
-            ]
-            that.$data.compare = arr
-            that.$data.current = points[0].y
-            return s
-          },
-          useHTML: true
+      dv
+        .transform({
+          type: "fold",
+          fields: names, // 展开字段集
+          key: "date", // key字段
+          value: "value" // value字段
+        })
+      const chart = new G2.Chart({
+        container: this.id,
+        forceFit: true,
+        height: 300
+      });
+      chart.source(dv);
+      chart.scale("time", {
+        min: 0,
+        max: 1440,
+        tickCount: 10
+      });
+      chart.tooltip({
+        crosshairs: {
+          type: "line"
         }
-      }
-      this.optionBig = opt
-      return opt
+      });
+      chart.axis("value", {
+        label: {
+          formatter: val => {
+            return val;
+          }
+        }
+      });
+      chart.legend("date", {
+        textStyle: { fill: "#333" }
+      });
+      chart.scale("x", {
+        sync: true
+      });
+
+      chart
+        .line()
+        .position("time*value")
+        .color("date", ["#7070FF", "#FF5757", "#6AFF6A"])
+        .shape("smooth")
+        .size(1)
+        .select("rangeX");
+
+      chart.render();
+      chart.on("tooltip:change", ev => {
+        let item = ev.items;
+        if(item.length==2){
+          item.unshift({name:'今天',value:0})
+        }
+        let day = comparison(item[0].value, item[1].value);
+        let week = comparison(item[0].value, item[2].value);
+        let arr = [
+          {
+            icon: day.icon,
+            data: day.data,
+            color: day.color
+          },
+          {
+            icon: week.icon,
+            data: week.data,
+            color: week.color
+          }
+        ];
+        this.compare = arr;
+        this.current = item[0].value
+        this.time = item[1].title
+      });
     }
   },
   created () {
-    if (this.initFlag !== true) {
       this.id = randomString(4)
       this.reflash()
-    } else {
-      this.compareInit()
-      this.id = randomString(4)
-      this.title2 = this.option.title
-      this.qualityData.describe = this.option.des
-      this.$nextTick(() => {
-        // log(this.compareToBig)
-        // this.compareInit()
-        this.compareData = this.option.compareData
-        Highcharts.chart(this.id, this.option.opt)
-      })
-    }
   },
   updated () {
     if (this.first) {

@@ -39,41 +39,45 @@
     </div>
 </template>
 <script>
-import Highcharts from 'highcharts'
-import $ from 'jquery'
-import {Icon, Spin} from 'iview'
-import {mapState} from 'vuex'
-import axios from 'axios'
+import { Icon, Spin } from "iview";
+import { mapMutations } from "vuex";
+import axios from "axios";
+import G2 from "@antv/g2";
+import DataSet from "@antv/data-set";
 
-const log = console.log.bind(this)
+const log = console.log.bind(this);
 
-function comparison (num1, num2) { // 计算变化率
-  let rate = Math.round((num1 - num2) / num2 * 10000) / 100 + '%'
+function comparison(num1, num2) {
+  num1 = Number(num1);
+  num2 = Number(num2);
+  // 计算变化率
+  let rate = Math.round((num1 - num2) / num2 * 10000) / 100 + "%";
   if (num1 > num2) {
     return {
-      color: 'green',
+      color: "green",
       data: rate,
-      icon: 'arrow-up-a'
-    }
+      icon: "arrow-up-a"
+    };
   } else {
     return {
-      color: 'red',
+      color: "red",
       data: rate,
-      icon: 'arrow-down-a'
-    }
+      icon: "arrow-down-a"
+    };
   }
 }
 
-function randomString (len) { // 随机生成字符串  用来做id
-  len = len || 32
-  var $chars = 'abcdefhijkmnprstwxyz2345678'
+function randomString(len) {
+  // 随机生成字符串  用来做id
+  len = len || 32;
+  var $chars = "abcdefhijkmnprstwxyz2345678";
   /** **默认去掉了容易混淆的字符oOLl,9gq,Vv,Uu,I1****/
-  var maxPos = $chars.length
-  var pwd = ''
+  var maxPos = $chars.length;
+  var pwd = "";
   for (let i = 0; i < len; i++) {
-    pwd += $chars.charAt(Math.floor(Math.random() * maxPos))
+    pwd += $chars.charAt(Math.floor(Math.random() * maxPos));
   }
-  return pwd
+  return pwd;
 }
 
 export default {
@@ -85,78 +89,77 @@ export default {
     option: {
       type: Object
     },
-    compareToBig: {
-      // type: Object
-    }
+    handleAjaxData:{}
   },
   components: {
-    Icon, Spin
+    Icon,
+    Spin
   },
-  data () {
+  data() {
     return {
-      id: '',
-      title: '',
-      title2: '', // 真正的标题
+      id: "",
+      title: "",
+      title2: "", // 真正的标题
       compare: [],
-      time: '',
+      time: "",
       current: 0, // 初始值
       optionBig: {}, // 用来传给大图的值
       monitorData: {},
       compareData: [],
       loading: false,
       error: false
-    }
+    };
   },
   watch: {
-    compareToBig (n) {
-      this.compare = n.arr
-      this.time = n.time
-      this.current = n.current
-    },
-    option (n) {
-      this.reflash()
+    option(n) {
+      this.reflash();
     }
   },
   computed: {
-    expandIcon () {
+    expandIcon() {
       if (this.initFlag) {
         return {
-          type: 'close-round',
+          type: "close-round",
           method: this.closeIt
-        }
+        };
       } else {
         return {
-          type: 'arrow-expand',
+          type: "arrow-expand",
           method: this.expand
-        }
+        };
       }
     }
   },
   methods: {
-    reflash () {
-      this.id = randomString(4)
-      this.time = this.now()
-      this.compareInit()
-      this.getMonitorData().then(() => { // 保证在compareInit执行时this.compareData有值
+    ...mapMutations(['changeBigChartData']),
+    reflash() {
+      this.id = randomString(4);
+      this.time = this.now();
+      this.compareInit();
+      this.getMonitorData().then(() => {
+        // 保证在compareInit执行时this.compareData有值
         this.$nextTick(() => {
-          this.compareInit()
-          this.title = this.monitorData.option.title // 保留完整标题便于之后正则匹配
-          this.title2 = this.monitorData.option.title.split(' ')[2]
-          let opt = this.monitorData.option
-          let optObj = this.showChart(
-            opt.series,
-            opt.categories,
-            opt.title,
-            opt.type
-          )
-          Highcharts.chart(this.id, optObj)
-        })
-      })
+          this.compareInit();
+          this.title = this.monitorData.option.title; // 保留完整标题便于之后正则匹配
+          this.title2 = this.monitorData.option.title.split(" ")[2];
+          let opt = this.monitorData.option;
+          this.showChart(opt.data);
+          // let optObj = this.showChart(
+          //   opt.series,
+          //   opt.categories,
+          //   opt.title,
+          //   opt.type
+          // )
+          // Highcharts.chart(this.id, optObj)
+        });
+      });
     },
-    compareInit () {
-      let arr = this.option.compareData ? this.option.compareData : this.compareData
-      let day = comparison(arr[0], arr[1])
-      let week = comparison(arr[0], arr[2])
+    compareInit() {
+      let arr = this.option.compareData
+        ? this.option.compareData
+        : this.compareData;
+      let day = comparison(arr[0], arr[1]);
+      let week = comparison(arr[0], arr[2]);
       this.compare = [
         {
           icon: day.icon,
@@ -168,298 +171,289 @@ export default {
           data: week.data,
           color: week.color
         }
-      ]
-      this.current = arr[0]
+      ];
+      this.current = arr[0];
     },
-    now () {
-      let myDate = new Date()
-      let hour = myDate.getHours()
-      let min = myDate.getMinutes()
+    now() { //当前时间
+      let myDate = new Date();
+      let hour = myDate.getHours();
+      let min = myDate.getMinutes();
       if (min < 5) {
-        return `${(hour - 1)}:${min + 55}`
+        return `${hour - 1}:${min + 55}`;
       }
-      return `${hour}:${min - 5}`
+      return `${hour}:${min - 5}`;
     },
-    getDataNow (num) { // 拿到当前时间在后台数据中对应的序号
-      let myDate = new Date()
-      let hour = myDate.getHours()
-      let min = myDate.getMinutes()
+    getDataNow(num) {
+      // 拿到当前时间在后台数据中对应的序号
+      let myDate = new Date();
+      let hour = myDate.getHours();
+      let min = myDate.getMinutes();
       if (min < num) {
-        return (hour - 1) * 60 + min + 60 - num
+        return (hour - 1) * 60 + min + 60 - num;
       }
-      return hour * 60 + min - num
+      return hour * 60 + min - num;
     },
-    closeIt () {
-      this.$emit('closeIt')
+    closeIt() {
+      this.$emit("closeIt");
     },
-    async getMonitorData () { // 监视器数据
+    async getMonitorData() {
+      // 监视器数据
       // context.commit('changeLoading')
-      this.loading = true
-      let ids = this.option
-      var chartArr = []
-      let index = this.getDataNow(5) // 以当前时间的五分钟前为序号
-      let res
-      let url = `/accesslayer/NewsMonitorAccesslayer/GetThreeDailyData?type=1&mixid=${ids.mixid}&attrid=${ids.attrid}`
-      axios.defaults.timeout =  60000
+      this.loading = true;
+      let ids = this.option;
+      var chartArr = [];
+      let index = this.getDataNow(5); // 以当前时间的五分钟前为序号
+      let res;
+      let url = `http://test.lg.webdev.com/accesslayer/NewsMonitorAccesslayer/GetThreeDailyData?type=1&mixid=${
+        ids.mixid
+      }&attrid=${ids.attrid}`;
+      axios.defaults.timeout = 60000;
       try {
-        // res = await axios(url)
-        res = await axios('https://api.myjson.com/bins/q8rni')
+        res = await axios(url);
+        // res = await axios("https://api.myjson.com/bins/q8rni");
       } catch (e) {
-        res = {}
-        this.error = true
+        res = {};
+        this.error = true;
       }
-      this.loading = false
+      this.loading = false;
       let obj = {
         title: ids.title,
         data: res.data,
         mixid: ids.mixid,
         attrid: ids.attrid
-      }
-      this.changeMonitorData(obj)
-      let array = [] // 存放当前时间的值
+      };
+      this.changeMonitorData(obj);
+      let array = []; // 存放当前时间的值
       res.data.data.forEach((value, num) => {
-        array[num] = value.data[index]
-      })
-      this.compareData = array
+        array[num] = value.data[index];
+      });
+      this.compareData = array;
     },
-    changeMonitorData (obj) {
+    changeMonitorData(obj) {
       if (obj.data) {
-        let series = obj.data.data
-        let categories = obj.data.categories
         this.monitorData = {
           option: {
-            series,
-            categories,
+            data: obj.data,
             title: obj.title,
-            type: 'line'
+            type: "line"
           },
           describe: `视图ID为${obj.mixid},属性ID为${obj.attrid}`
-        }
+        };
       }
     },
-    expand () { // 放大效果
-      this.$emit('expand', {
-        opt: this.optionBig,
-        title: this.title2,
+    expand() {
+      // 放大效果
+      this.$emit('expand')
+      this.changeBigChartData({
+        chartData:this.monitorData.option.data,
+        title:this.title2,
         des: this.monitorData.describe,
-        compareData: this.compareData
-      })
+        current:this.current,
+        time:this.time,
+        compare:this.compare
+      });
     },
-    showChart (series, categories, title, chartType) {
-      let that = this
-      let opt = {
-        chart: {
-          type: chartType, // 指定图表的类型，默认是折线图（line）
-          zoomType: 'x',
-          events: {
-            redraw: function () {
-              let container = this.container
-              let width = $(container).width()
-              let height = Math.min(0.92 * width, 350) + 'px'
-              if (0.92 * width < 330) height = '330px'
-              $(this.container).height(height)
-              $(container).children('.highcharts-root').height(height)
-            }
-          }
-        },
-        colors: ['#7070FF', '#FF5757', '#6AFF6A'],
-        credits: {
-          enabled: false
-        }, // 去掉地址
-        title: {
-          text: '' // 指定图表标题
-        },
-        xAxis: {
-          categories: categories, // 指定x轴分组
-          labels: {
-            rotation: 0// 调节倾斜角度偏移
-          }
-        },
-        yAxis: {
-          title: {
-            text: '' // 指定y轴的标题
-
-          }
-        },
-        plotOptions: {
-          column: {
-            colorByPoint: true
-          },
-          series: {
-            lineWidth: 1
-          }
-        },
-        series: series,
-
-        getThis: () => { // 获取当前vue的this
-          return this
-        },
-        tooltip: {
-          shared: true,
-          // valueSuffix: '分',
-          formatter: function () {
-            let that = opt.getThis()
-            let points = this.points
-            let s = `<p>${points[0].x}</p>`
-            let words = ['当前时间', '一天前', '七天前']
-            $.each(points, function (i, v) {
-              s += `<span style="font-weight:bold;color:#7a85a2;display: block;">${words[i]}: ${v.point.y} </span>`
-              that.$data.time = points[0].x
-            })
-            let day = comparison(points[0].y, points[1].y)
-            let week = comparison(points[0].y, points[2].y)
-            let arr = [
-              {
-                icon: day.icon,
-                data: day.data,
-                color: day.color
-              },
-              {
-                icon: week.icon,
-                data: week.data,
-                color: week.color
-              }
-            ]
-            that.$data.compare = arr
-            that.$emit('compareFromBig', {
-              arr,
-              time: points[0].x,
-              current: points[0].y
-            }) // expand函数传过去时,that指向的还是原来小图的vue实例,因此只能手动再把compare的数值传过去
-            that.$data.current = points[0].y
-            return s
-          },
-          useHTML: true
+    showChart(data) {
+      let names = [];
+      data.data.forEach(item => {
+        names.push(item.name.replace(/\d+\-0/, "").replace(/\-/, "月") + "日");
+      });
+      let chartData = this.handleAjaxData(data);
+      const ds = new DataSet();
+      const dv = ds.createView().source(chartData);
+      dv
+        .transform({
+          type: "fold",
+          fields: names, // 展开字段集
+          key: "date", // key字段
+          value: "value" // value字段
+        })
+      const chart = new G2.Chart({
+        container: this.id,
+        forceFit: true,
+        height: 300
+      });
+      chart.source(dv);
+      chart.scale("time", {
+        min: 0,
+        max: 1440,
+        tickCount: 10
+      });
+      chart.tooltip({
+        crosshairs: {
+          type: "line"
         }
-      }
-      this.optionBig = opt
-      return opt
+      });
+      chart.axis("value", {
+        label: {
+          formatter: val => {
+            return val;
+          }
+        }
+      });
+      chart.legend("date", {
+        textStyle: { fill: "#333" }
+      });
+      chart.scale("x", {
+        sync: true
+      });
+
+      chart
+        .line()
+        .position("time*value")
+        .color("date", ["#7070FF", "#FF5757", "#6AFF6A"])
+        .shape("smooth")
+        .size(1)
+        .select("rangeX");
+
+      chart.render();
+      chart.on("tooltip:change", ev => {
+        let item = ev.items;
+        if(item.length==2){
+          item.unshift({name:'今天',value:0})
+        }
+        let day = comparison(item[0].value, item[1].value);
+        let week = comparison(item[0].value, item[2].value);
+        let arr = [
+          {
+            icon: day.icon,
+            data: day.data,
+            color: day.color
+          },
+          {
+            icon: week.icon,
+            data: week.data,
+            color: week.color
+          }
+        ];
+        this.compare = arr;
+        this.current = item[0].value
+        this.time = item[1].title
+      });
     }
   },
-  created () {
-    if (this.initFlag !== true) {
-      this.reflash()
-    } else {
-      log(this.option)
-      this.compareInit()
-      // this.compare = n.arr
-      // this.time = n.time
-      // this.current = n.current
-      this.id = randomString(4)
-      this.title2 = this.option.title
-      this.monitorData.describe = this.option.des
-      this.$nextTick(() => {
-        // log(this.compareToBig)
-        // this.compareInit()
-        this.compareData = this.option.compareData
-        Highcharts.chart(this.id, this.option.opt)
-      })
+  created() {
+      this.reflash();
+    // } else {
+    //   log(this.option);
+    //   this.compareInit();
+    //   // this.compare = n.arr
+    //   // this.time = n.time
+    //   // this.current = n.current
+    //   this.id = randomString(4);
+    //   this.title2 = this.option.title;
+    //   this.monitorData.describe = this.option.des;
+    //   this.$nextTick(() => {
+    //     // log(this.compareToBig)
+    //     // this.compareInit()
+    //     this.compareData = this.option.compareData;
+    //     Highcharts.chart(this.id, this.option.opt);
+    //   });
+    // }
+  }
+};
+</script>
+
+<style lang="scss" scoped>
+@mixin center() {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.chart-body {
+  width: 100%;
+  margin: 0 auto 35px;
+  background-color: white;
+  padding: 0 18px 0 0;
+  max-height: 433px;
+  overflow: hidden;
+  position: relative;
+  .error {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: 6;
+    text-align: center;
+    align-items: center;
+    line-height: 100%;
+    background-color: rgba(60, 63, 65, 0.6);
+    color: #ccc;
+    p {
+      font-size: 14px;
+      @include center();
     }
   }
 }
 
-</script>
+.x-bar {
+  border: none;
+}
 
-<style lang="scss" scoped>
-    @mixin center() {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-    }
-    .chart-body {
-        width: 100%;
-        margin: 0 auto 35px;
-        background-color: white;
-        padding: 0 18px 0 0;
-        max-height: 433px;
-        overflow: hidden;
-        position: relative;
-        .error{
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            z-index: 6;
-            text-align: center;
-            align-items:center;
-            line-height: 100%;
-            background-color: rgba(60,63,65,0.6);
-            color:#ccc;
-            p{
-                font-size: 14px;
-                @include center();
-            }
-        }
-    }
+.chart-head {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  height: 50px;
+  text-align: center;
+  font-size: 15px;
+  overflow: hidden;
+  align-items: center;
+  .headTitle {
+    display: inline-block;
+    line-height: 50px;
+    font-weight: 800;
+  }
+  .ivu-icon-arrow-expand {
+    font-size: 18px;
+    color: rgb(43, 133, 228);
+    float: left;
+    position: relative;
+    left: 2px;
+    line-height: 50px;
+  }
+  .ivu-icon-close-round {
+    font-size: 18px;
+    float: right;
+    line-height: 50px;
+  }
+}
 
-    .x-bar {
-        border: none;
-    }
+.el-button {
+  float: left;
+  border: none;
+  font-size: 18px;
+  position: relative;
+  top: 8px;
+  left: 5px;
+  .ivu-icon {
+    color: rgb(43, 133, 228);
+  }
+  .el-tooltip__popper is-light {
+    background-color: rgb(255, 231, 147);
+  }
+}
 
-    .chart-head {
-        position: relative;
-        margin: 0;
-        padding: 0;
-        height: 50px;
-        text-align: center;
-        font-size: 15px;
-        overflow: hidden;
-        align-items: center;
-        .headTitle {
-            display: inline-block;
-            line-height: 50px;
-            font-weight: 800;
-        }
-        .ivu-icon-arrow-expand {
-            font-size: 18px;
-            color: rgb(43, 133, 228);
-            float: left;
-            position: relative;
-            left: 2px;
-            line-height: 50px;
-        }
-        .ivu-icon-close-round {
-            font-size: 18px;
-            float: right;
-            line-height: 50px;
-        }
+.comparison {
+  overflow: hidden;
+  li {
+    float: right;
+    margin-left: 15px;
+    overflow: hidden;
+    p {
+      text-align: center;
+      color: rgb(55, 34, 255);
     }
+  }
 
-    .el-button {
-        float: left;
-        border: none;
-        font-size: 18px;
-        position: relative;
-        top: 8px;
-        left: 5px;
-        .ivu-icon {
-            color: rgb(43, 133, 228);
-        }
-        .el-tooltip__popper is-light {
-            background-color: rgb(255, 231, 147);
-        }
-    }
-
-    .comparison {
-        overflow: hidden;
-        li {
-            float: right;
-            margin-left: 15px;
-            overflow: hidden;
-            p {
-                text-align: center;
-                color: rgb(55, 34, 255);
-            }
-        }
-
-        li:nth-child(1) {
-            float: left;
-        }
-    }
-    .highcharts-root{
-      max-height: 320px!important;
-    }
-    .highcharts-container{
-      height: 320px;
-    }
+  li:nth-child(1) {
+    float: left;
+  }
+}
+.highcharts-root {
+  max-height: 320px !important;
+}
+.highcharts-container {
+  height: 320px;
+}
 </style>

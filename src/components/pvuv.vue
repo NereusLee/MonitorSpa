@@ -1,7 +1,7 @@
 <template>
     <div id="pvuv">
-        <div id="loading" v-show="loading">
-          <Spin size="large" fix v-if="loading"></Spin>
+        <div id="loading" v-if="Loading">
+          <Spin size="large" fix ></Spin>
         </div>
         <el-row style="margin-left: 17px;">
             <el-col :span="24">
@@ -48,7 +48,6 @@ export default {
       describe: ['图文PV', '图文UV', '视频UV', '视频PV'],
       title: ['图文PV', '图文UV', '视频UV', '视频PV'],
       ids: ['articlepv', 'articleuv', 'videouv', 'videovv'],
-      loading:true,
       // first:true  //初次加载
     }
   },
@@ -66,6 +65,9 @@ export default {
     },
     ChannelsData () {
       return this.channelsData
+    },
+    Loading(){
+      return this.loading
     }
   },
   watch: {
