@@ -4,13 +4,13 @@
         <Spin size="large" fix v-if="loading"></Spin>
         <div class="chart-head">
             <!--介绍文字和图标-->
-            <el-tooltip class="item" effect="light" :content="monitorData.describe" placement="right-start">
+            <el-tooltip class="item" effect="light" :content="option.describe" placement="right-start">
                 <el-button class='el-but'>
                     <Icon type="information-circled"></Icon>
                 </el-button>
             </el-tooltip>
-            <Icon :type="expandIcon.type" @click="expandIcon.method"></Icon>
-            <div class="headTitle">{{title2}}</div>
+            <Icon type="arrow-expand" @click="expand"></Icon>
+            <div class="headTitle">{{option.title}}</div>
 
         </div>
         <ul class="comparison" v-if="compare">
@@ -89,7 +89,10 @@ export default {
     option: {
       type: Object
     },
-    handleAjaxData:{}
+    handleAjaxData: {}
+    // queryUrl:{
+    //   type:String
+    // }
   },
   components: {
     Icon,
@@ -116,22 +119,22 @@ export default {
     }
   },
   computed: {
-    expandIcon() {
-      if (this.initFlag) {
-        return {
-          type: "close-round",
-          method: this.closeIt
-        };
-      } else {
-        return {
-          type: "arrow-expand",
-          method: this.expand
-        };
-      }
-    }
+    // expandIcon() {
+    //   if (this.initFlag) {
+    //     return {
+    //       type: "close-round",
+    //       method: this.closeIt
+    //     };
+    //   } else {
+    //     return {
+    //       type: "arrow-expand",
+    //       method: this.expand
+    //     };
+    //   }
+    // }
   },
   methods: {
-    ...mapMutations(['changeBigChartData']),
+    ...mapMutations(["changeBigChartData"]),
     reflash() {
       this.id = randomString(4);
       this.time = this.now();
@@ -140,17 +143,7 @@ export default {
         // 保证在compareInit执行时this.compareData有值
         this.$nextTick(() => {
           this.compareInit();
-          this.title = this.monitorData.option.title; // 保留完整标题便于之后正则匹配
-          this.title2 = this.monitorData.option.title.split(" ")[2];
-          let opt = this.monitorData.option;
-          this.showChart(opt.data);
-          // let optObj = this.showChart(
-          //   opt.series,
-          //   opt.categories,
-          //   opt.title,
-          //   opt.type
-          // )
-          // Highcharts.chart(this.id, optObj)
+          this.showChart(this.monitorData);
         });
       });
     },
@@ -174,7 +167,8 @@ export default {
       ];
       this.current = arr[0];
     },
-    now() { //当前时间
+    now() {
+      //当前时间
       let myDate = new Date();
       let hour = myDate.getHours();
       let min = myDate.getMinutes();
@@ -204,53 +198,40 @@ export default {
       var chartArr = [];
       let index = this.getDataNow(5); // 以当前时间的五分钟前为序号
       let res;
-      let url = `http://test.lg.webdev.com/accesslayer/NewsMonitorAccesslayer/GetThreeDailyData?type=1&mixid=${
-        ids.mixid
-      }&attrid=${ids.attrid}`;
       axios.defaults.timeout = 60000;
       try {
-        res = await axios(url);
+        res = await axios(this.option.url);
         // res = await axios("https://api.myjson.com/bins/q8rni");
       } catch (e) {
         res = {};
         this.error = true;
       }
       this.loading = false;
-      let obj = {
-        title: ids.title,
-        data: res.data,
-        mixid: ids.mixid,
-        attrid: ids.attrid
-      };
-      this.changeMonitorData(obj);
+      this.monitorData = res.data
+      // let obj = {
+      //   title: ids.title,
+      //   data: res.data,
+      //   mixid: ids.mixid,
+      //   attrid: ids.attrid
+      // };
+      // this.changeMonitorData(obj);
       let array = []; // 存放当前时间的值
       res.data.data.forEach((value, num) => {
         array[num] = value.data[index];
       });
       this.compareData = array;
     },
-    changeMonitorData(obj) {
-      if (obj.data) {
-        this.monitorData = {
-          option: {
-            data: obj.data,
-            title: obj.title,
-            type: "line"
-          },
-          describe: `视图ID为${obj.mixid},属性ID为${obj.attrid}`
-        };
-      }
-    },
     expand() {
       // 放大效果
-      this.$emit('expand')
+      log("expand");
+      this.$emit("expand");
       this.changeBigChartData({
-        chartData:this.monitorData.option.data,
-        title:this.title2,
-        des: this.monitorData.describe,
-        current:this.current,
-        time:this.time,
-        compare:this.compare
+        chartData: this.monitorData,
+        title: this.option.title,
+        des: this.option.describe,
+        current: this.current,
+        time: this.time,
+        compare: this.compare
       });
     },
     showChart(data) {
@@ -261,13 +242,12 @@ export default {
       let chartData = this.handleAjaxData(data);
       const ds = new DataSet();
       const dv = ds.createView().source(chartData);
-      dv
-        .transform({
-          type: "fold",
-          fields: names, // 展开字段集
-          key: "date", // key字段
-          value: "value" // value字段
-        })
+      dv.transform({
+        type: "fold",
+        fields: names, // 展开字段集
+        key: "date", // key字段
+        value: "value" // value字段
+      });
       const chart = new G2.Chart({
         container: this.id,
         forceFit: true,
@@ -307,10 +287,14 @@ export default {
         .select("rangeX");
 
       chart.render();
+      chart.on('plotdblclick',()=>{
+        log(this)
+        window.location.href = this.option.link
+      })
       chart.on("tooltip:change", ev => {
         let item = ev.items;
-        if(item.length==2){
-          item.unshift({name:'今天',value:0})
+        if (item.length == 2) {
+          item.unshift({ title: item[1].title, name: "今天", value: 0 });
         }
         let day = comparison(item[0].value, item[1].value);
         let week = comparison(item[0].value, item[2].value);
@@ -327,29 +311,14 @@ export default {
           }
         ];
         this.compare = arr;
-        this.current = item[0].value
-        this.time = item[1].title
+        this.current = item[0].value;
+        this.time = item[1].title;
       });
     }
   },
   created() {
-      this.reflash();
-    // } else {
-    //   log(this.option);
-    //   this.compareInit();
-    //   // this.compare = n.arr
-    //   // this.time = n.time
-    //   // this.current = n.current
-    //   this.id = randomString(4);
-    //   this.title2 = this.option.title;
-    //   this.monitorData.describe = this.option.des;
-    //   this.$nextTick(() => {
-    //     // log(this.compareToBig)
-    //     // this.compareInit()
-    //     this.compareData = this.option.compareData;
-    //     Highcharts.chart(this.id, this.option.opt);
-    //   });
-    // }
+    log(this.option)
+    this.reflash();
   }
 };
 </script>
@@ -400,9 +369,20 @@ export default {
   overflow: hidden;
   align-items: center;
   .headTitle {
-    display: inline-block;
+    height: 50px;
     line-height: 50px;
     font-weight: 800;
+    position: relative;
+    overflow: hidden;
+  }
+  .headTitle::after {
+    content: "...";
+    font-weight: bold;
+    position: absolute;
+    bottom: 0;
+    right: -32;
+    padding: 0 20px 1px 45px;
+    background: #fff;
   }
   .ivu-icon-arrow-expand {
     font-size: 18px;

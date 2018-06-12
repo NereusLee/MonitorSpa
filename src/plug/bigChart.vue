@@ -110,7 +110,6 @@ export default {
     // },
     showChart() {
       //   let names = ['今天','1天前','7天前']
-      log(this.handleAjaxData);
       let chartData = this.handleAjaxData(this.bigChartData.chartData);
       let names = [];
       this.bigChartData.chartData.data.forEach(item => {
@@ -180,7 +179,7 @@ export default {
       chart.on("tooltip:change", ev => {
         let item = ev.items;
         if (item.length == 2) {
-          item.unshift({ name: "今天", value: 0 });
+          item.unshift({ title:item[1].title,name: "今天", value: 0 });
         }
         let day = comparison(item[0].value, item[1].value);
         let week = comparison(item[0].value, item[2].value);
@@ -226,9 +225,7 @@ export default {
     this.des = this.bigChartData.des;
   },
   mounted() {
-    log(this.bigChartData);
     // this.$nextTick(() => {
-      log(document.querySelector("#c1"));
       this.showChart();
     // });
   }
