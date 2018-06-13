@@ -27,6 +27,7 @@
                         :key="'chart'+index"
                 >
                     <chart2 style="max-height: 370px"
+                            class="animated bounceInUp"
                             :option="x"
                             :initFlag="false"
                             @expand="bigger"
@@ -38,6 +39,7 @@
                 <!--接入层质量接口-->
                 <el-col :span="8" v-for="(x,index) in accessList" :key="'access'+index">
                     <chart2
+                            class="animated bounceInUp"
                             @expand="bigger"
                             style="max-height: 370px"
                             :option="x"
@@ -51,6 +53,7 @@
                         :span="8" v-for="(x,index) in appQualityList"
                         :key="'app'+index">
                     <chart2
+                            class="animated bounceInUp"
                             @expand="bigger"
                             style="max-height: 370px"
                             :option = 'x'
@@ -67,8 +70,6 @@ import { mapActions, mapState } from "vuex";
 import chart2 from "@/plug/Chart2";
 import myMenu from "@/plug/myMenu";
 import { Button, Modal } from "iview";
-import accessQualityChart from "@/plug/accessQualityChart";
-import appQualityChart from "@/plug/appQualityChart";
 import bigChart from "@/plug/bigChart";
 
 const log = console.log.bind(this);
@@ -79,8 +80,6 @@ export default {
     Button,
     myMenu,
     chart2,
-    accessQualityChart,
-    appQualityChart,
     Modal,
     bigChart
   },
@@ -221,7 +220,7 @@ export default {
       this.list.forEach(item => {
         array.push({
           title: item.title.split(" ")[2],
-          url: `http://tst.lg.webdev.com/accesslayer/NewsMonitorAccesslayer/GetThreeDailyData?type=1&mixid=${
+          url: `/accesslayer/NewsMonitorAccesslayer/GetThreeDailyData?type=1&mixid=${
             item.mixid
           }&attrid=${item.attrid}`,
           describe: `视图ID为${item.mixid},属性ID为${item.attrid}`
@@ -229,24 +228,17 @@ export default {
       });
       return array;
     },
-    accessQualityList() {
-      let ids = this.$route.params.type == "kuaibao" ? this.kuaibao : this.news;
-      return ids.accessQualityList;
-    },
     accessList() {
       let ids = this.$route.params.type == "kuaibao" ? this.kuaibao : this.news;
-      // let host = window.location.host;
-      let host = 'test.lg.webdev.com'
-      let baseUrl = `http://${host}/accesslayer/${
-        ids.accessQualityList.queryMethod
-      }/`;
-      let type =
-        this.$route.params.type == "kuaibao" ? "cnewscode" : "inewscode";
+      let host = window.location.host;
+      // let host = 'test.lg.webdev.com'
+      let baseUrl = `http://${host}/accesslayer/${ids.accessQualityList.queryMethod}/`;
+      let type = this.$route.params.type == "kuaibao" ? "cnewscode" : "inewscode";
       let arr = [];
       ids.accessQualityList.metric.forEach(item => {
         arr.push({
           title: "接入层整体" + this.CName[item],
-          url: `http://test.lg.webdev.com/accesslayer/${
+          url: `/accesslayer/${
             ids.accessQualityList.queryMethod
           }/getConnTrend?metric=${item}&etime=23:59`,
           link: baseUrl + type + `?metric=${item}`,
@@ -263,8 +255,8 @@ export default {
           ? "KuaibaoQuality"
           : "InewsQuality";
       let type = ids.appid;
-      // let host = window.location.host
-      let host = "test.lg.webdev.com";
+      let host = window.location.host
+      // let host = "test.lg.webdev.com";
 
       let params = this.appQualityParams;
       let quality = [];
@@ -284,7 +276,7 @@ export default {
           }/?platform=${chartName.split(" ")[0].match(/[a-z]+/)[0]}`;
           quality.push({
             title: chartName + "总体耗时(95分位)",
-            url: `http://test.lg.webdev.com//appnews/News99_95/GetThreedailyCmpData?appid=${item}&t_type=${
+            url: `/appnews/News99_95/GetThreedailyCmpData?appid=${item}&t_type=${
               it.t_type
             }&uri=${this.appUri[chartName]}&code=1000&sdate=${this.GetDateStr(
               0
@@ -293,16 +285,6 @@ export default {
             }&pushmark=${it.pushmark}`,
             describe: "双击图表进入详情页",
             link: url2
-            // param: {
-            //   appid: item,
-            //   t_type: it.t_type,
-            //   pushmark: it.pushmark,
-            //   data_type: it.data_type,
-            //   uri: this.appUri[chartName],
-            //   link: `${page}/cnews${it.cnews}`,
-            //   sdate:this.GetDateStr(0),
-            //   edate:this.GetDateStr(-1)
-            // }
           });
         });
       });

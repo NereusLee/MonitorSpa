@@ -1,3 +1,18 @@
+<script>
+/**
+ * Created by v_yingdli
+ * 该组件需传入的props为:
+ * option:{
+ *  title:String,  图表标题
+ *  url:String,  获取数据的接口
+ *  link:String,  需要跳转到的详情页链接
+ *  describe:String  图表的详情描述
+ * }
+ * handleAjaxData:function  处理传入数据的函数
+ */
+</script>
+
+
 <template>
     <div class="chart-body" :option="option">
         <div class="error" v-if="error">
@@ -50,26 +65,6 @@ import DataSet from "@antv/data-set";
 
 const log = console.log.bind(this);
 
-function comparison(num1, num2) {
-  num1 = Number(num1);
-  num2 = Number(num2);
-  // 计算变化率
-  let rate = Math.round((num1 - num2) / num2 * 10000) / 100 + "%";
-  if (num1 > num2) {
-    return {
-      color: "green",
-      data: rate,
-      icon: "arrow-up-a"
-    };
-  } else {
-    return {
-      color: "red",
-      data: rate,
-      icon: "arrow-down-a"
-    };
-  }
-}
-
 function randomString(len) {
   // 随机生成字符串  用来做id
   len = len || 32;
@@ -86,16 +81,10 @@ function randomString(len) {
 export default {
   // 验证类型
   props: {
-    initFlag: {
-      type: Boolean
-    },
     option: {
       type: Object
     },
     handleAjaxData: {}
-    // queryUrl:{
-    //   type:String
-    // }
   },
   components: {
     Icon,
@@ -104,14 +93,11 @@ export default {
   data() {
     return {
       id: "",
-      title: "",
-      title2: "", // 真正的标题
       compare: [],
       time: "",
       current: 0, // 初始值
-      optionBig: {}, // 用来传给大图的值
-      monitorData: {},
-      compareData: [],
+      monitorData: {},//存放从接口处或获取的数据,用于渲染图表和传给放大的图表
+      compareData: [1,2,3],
       loading: false,
       error: false
     };
@@ -121,41 +107,41 @@ export default {
       this.refresh();
     }
   },
-  computed: {
-    // expandIcon() {
-    //   if (this.initFlag) {
-    //     return {
-    //       type: "close-round",
-    //       method: this.closeIt
-    //     };
-    //   } else {
-    //     return {
-    //       type: "arrow-expand",
-    //       method: this.expand
-    //     };
-    //   }
-    // }
-  },
   methods: {
     ...mapMutations(["changeBigChartData"]),
-    refresh() {
-      this.id = randomString(4);
+    refresh() {  //刷新图表
       this.time = this.now();
-      this.compareInit();
       this.getMonitorData().then(() => {
         // 保证在compareInit执行时this.compareData有值
+        this.compareInit();
         this.$nextTick(() => {
-          this.compareInit();
           this.showChart(this.monitorData);
         });
       });
     },
-    compareInit() {
-      let arr = this.option.compareData
-        ? this.option.compareData
-        : this.compareData;
-      let day = comparison(arr[0], arr[1]);
-      let week = comparison(arr[0], arr[2]);
+    comparison(num1, num2) {
+      num1 = Number(num1);
+      num2 = Number(num2);
+      // 计算变化率
+      let rate = Math.round((num1 - num2) / num2 * 10000) / 100 + "%";
+      if (num1 > num2) {
+        return {
+          color: "green",
+          data: rate,
+          icon: "arrow-up-a"
+        };
+      } else {
+        return {
+          color: "red",
+          data: rate,
+          icon: "arrow-down-a"
+        };
+      }
+    },
+    compareInit() {  
+      let arr = this.compareData;
+      let day = this.comparison(arr[0], arr[1]);
+      let week = this.comparison(arr[0], arr[2]);
       this.compare = [
         {
           icon: day.icon,
@@ -189,9 +175,6 @@ export default {
         return (hour - 1) * 60 + min + 60 - num;
       }
       return hour * 60 + min - num;
-    },
-    closeIt() {
-      this.$emit("closeIt");
     },
     async getMonitorData() {
       // 监视器数据
@@ -287,6 +270,9 @@ export default {
 
       chart.render();
       chart.on('plotdblclick',()=>{
+        if(!this.option.link){
+          return
+        }
         window.location.href = this.option.link
       })
       chart.on("tooltip:change", ev => {
@@ -294,8 +280,8 @@ export default {
         if (item.length == 2) {
           item.unshift({ title: item[1].title, name: "今天", value: 0 });
         }
-        let day = comparison(item[0].value, item[1].value);
-        let week = comparison(item[0].value, item[2].value);
+        let day = this.comparison(item[0].value, item[1].value);
+        let week = this.comparison(item[0].value, item[2].value);
         let arr = [
           {
             icon: day.icon,
@@ -315,7 +301,11 @@ export default {
     }
   },
   created() {
-    this.refresh();
+    this.id = randomString(4);
+    this.compareInit()
+    this.$nextTick(()=>{
+      this.refresh();
+    })
   }
 };
 </script>
@@ -384,7 +374,6 @@ export default {
     overflow: hidden;
   }
   .headTitle::after {
-    content: "...";
     font-weight: bold;
     position: absolute;
     bottom: 0;

@@ -12,6 +12,7 @@ import 'iview/dist/styles/iview.css'
 import {Row, Col, DatePicker, Button, Tooltip, Option, Select} from 'element-ui'
 import ViserVue from 'viser-vue'
 import G2 from '@antv/g2'
+import '@/assets/animate.min.css'
 
 Vue.prototype.$ELEMENT = { size: 'small' }
 Vue.use(Row)

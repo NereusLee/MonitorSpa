@@ -118,7 +118,7 @@ export default {
       const ds = new DataSet({
         state: {
           start: "05:00",
-          end: "10:39"
+          end: "07:00",
         }
       });
       const dv = ds.createView().source(chartData);
@@ -203,7 +203,7 @@ export default {
       const slider = new Slider({
         container: "slider",
         start: "05:00",
-        end: "10:39",
+        end: "07:00",
         data: chartData, // !!! 注意是原始数据，不要传入 dv
         xAxis: "time",
         yAxis: "value",
