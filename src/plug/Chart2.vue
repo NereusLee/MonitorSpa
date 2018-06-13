@@ -1,6 +1,9 @@
 <template>
     <div class="chart-body" :option="option">
-        <div class="error" v-if="error"><p>网络请求错误或超时!</p></div>
+        <div class="error" v-if="error">
+          <p>网络请求错误或超时!</p>
+          <Icon type="refresh" class="refresh" @click='refresh'></Icon>
+        </div>
         <Spin size="large" fix v-if="loading"></Spin>
         <div class="chart-head">
             <!--介绍文字和图标-->
@@ -115,7 +118,7 @@ export default {
   },
   watch: {
     option(n) {
-      this.reflash();
+      this.refresh();
     }
   },
   computed: {
@@ -135,7 +138,7 @@ export default {
   },
   methods: {
     ...mapMutations(["changeBigChartData"]),
-    reflash() {
+    refresh() {
       this.id = randomString(4);
       this.time = this.now();
       this.compareInit();
@@ -202,19 +205,16 @@ export default {
       try {
         res = await axios(this.option.url);
         // res = await axios("https://api.myjson.com/bins/q8rni");
+        if(typeof(res.data) == 'string'){
+          this.error = true
+        } 
       } catch (e) {
         res = {};
         this.error = true;
       }
-      this.loading = false;
+      this.loading = false; 
       this.monitorData = res.data
-      // let obj = {
-      //   title: ids.title,
-      //   data: res.data,
-      //   mixid: ids.mixid,
-      //   attrid: ids.attrid
-      // };
-      // this.changeMonitorData(obj);
+    
       let array = []; // 存放当前时间的值
       res.data.data.forEach((value, num) => {
         array[num] = value.data[index];
@@ -223,7 +223,6 @@ export default {
     },
     expand() {
       // 放大效果
-      log("expand");
       this.$emit("expand");
       this.changeBigChartData({
         chartData: this.monitorData,
@@ -288,7 +287,6 @@ export default {
 
       chart.render();
       chart.on('plotdblclick',()=>{
-        log(this)
         window.location.href = this.option.link
       })
       chart.on("tooltip:change", ev => {
@@ -317,8 +315,7 @@ export default {
     }
   },
   created() {
-    log(this.option)
-    this.reflash();
+    this.refresh();
   }
 };
 </script>
@@ -338,6 +335,9 @@ export default {
   max-height: 433px;
   overflow: hidden;
   position: relative;
+  .ivu-icon-arrow-expand{
+    cursor: pointer;
+  }
   .error {
     width: 100%;
     height: 100%;
@@ -351,6 +351,14 @@ export default {
     p {
       font-size: 14px;
       @include center();
+    }
+    .refresh{
+      cursor: pointer;
+      position: absolute;
+      left: 50%;
+      bottom: 20%;
+      transform: translate(-50%,0);
+      font-size: 28px;
     }
   }
 }

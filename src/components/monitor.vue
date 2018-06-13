@@ -24,36 +24,32 @@
                 <el-col
                         :span="8"
                         v-for="(x,index) in listOption"
-                        :key="x.id"
+                        :key="'chart'+index"
                 >
                     <chart2 style="max-height: 370px"
                             :option="x"
                             :initFlag="false"
                             @expand="bigger"
-                            @compareFromBig="compareFromBig"
                             v-if="menuSelection=='接入层'||menuSelection=='push'"
                             :handleAjaxData='handler'
-                            :queryUrl="`http://test.lg.webdev.com/accesslayer/NewsMonitorAccesslayer/GetThreeDailyData?type=1&mixid=${
-        x.mixid
-      }&attrid=${x.attrid}`"
                     ></chart2>
 
                 </el-col>
                 <!--接入层质量接口-->
-                <el-col :span="8" v-for="(x,index) in accessQualityList.metric" :key="x">
-                    <accessQuality-chart
+                <el-col :span="8" v-for="(x,index) in accessList" :key="'access'+index">
+                    <chart2
+                            @expand="bigger"
                             style="max-height: 370px"
                             :option="x"
-                            :queryMethod="accessQualityList.queryMethod"
                             v-if="menuSelection=='接入层'"
                             :handleAjaxData='handler'
-                    ></accessQuality-chart>
+                    ></chart2>
                 </el-col>
                 <!-- APP质量 -->
                 <el-col
                         v-if="menuSelection=='APP质量'"
                         :span="8" v-for="(x,index) in appQualityList"
-                        :key="index">
+                        :key="'app'+index">
                     <chart2
                             @expand="bigger"
                             style="max-height: 370px"
@@ -143,6 +139,11 @@ export default {
         },
         menuList: ["接入层", "push", "APP质量"]
       },
+      CName: {
+        num: "请求量",
+        avg_response_time: "平均耗时",
+        percent95: "95分位耗时"
+      },
       appQualityParams: [
         {
           t_type: "liebiao",
@@ -191,7 +192,6 @@ export default {
       option: {},
       theme: "dark",
       showBig: false,
-      optionBig: {},
       list: "",
       menuSelection: "接入层",
       handler: function(data) {
@@ -221,11 +221,10 @@ export default {
       this.list.forEach(item => {
         array.push({
           title: item.title.split(" ")[2],
-          url: `http://test.lg.webdev.com/accesslayer/NewsMonitorAccesslayer/GetThreeDailyData?type=1&mixid=${
+          url: `http://tst.lg.webdev.com/accesslayer/NewsMonitorAccesslayer/GetThreeDailyData?type=1&mixid=${
             item.mixid
           }&attrid=${item.attrid}`,
-          handleAJaxData: this.handler,
-          describe:`视图ID为${item.mixid},属性ID为${item.attrid}`
+          describe: `视图ID为${item.mixid},属性ID为${item.attrid}`
         });
       });
       return array;
@@ -233,6 +232,28 @@ export default {
     accessQualityList() {
       let ids = this.$route.params.type == "kuaibao" ? this.kuaibao : this.news;
       return ids.accessQualityList;
+    },
+    accessList() {
+      let ids = this.$route.params.type == "kuaibao" ? this.kuaibao : this.news;
+      // let host = window.location.host;
+      let host = 'test.lg.webdev.com'
+      let baseUrl = `http://${host}/accesslayer/${
+        ids.accessQualityList.queryMethod
+      }/`;
+      let type =
+        this.$route.params.type == "kuaibao" ? "cnewscode" : "inewscode";
+      let arr = [];
+      ids.accessQualityList.metric.forEach(item => {
+        arr.push({
+          title: "接入层整体" + this.CName[item],
+          url: `http://test.lg.webdev.com/accesslayer/${
+            ids.accessQualityList.queryMethod
+          }/getConnTrend?metric=${item}&etime=23:59`,
+          link: baseUrl + type + `?metric=${item}`,
+          describe: "双击图表进入详情页"
+        });
+      });
+      return arr;
     },
     appQualityList() {
       let ids = this.$route.params.type == "kuaibao" ? this.kuaibao : this.news;
@@ -243,8 +264,7 @@ export default {
           : "InewsQuality";
       let type = ids.appid;
       // let host = window.location.host
-      let host = 'test.lg.webdev.com'
-      
+      let host = "test.lg.webdev.com";
 
       let params = this.appQualityParams;
       let quality = [];
@@ -259,9 +279,11 @@ export default {
             chartName =
               this.appQualityName[item] + " " + this.appQualityName[it.t_type];
           }
-          let url2 = `http://${host}/accesslayer/${page}/cnews${it.cnews}/?platform=${chartName.split(' ')[0].match(/[a-z]+/)[0]}`
+          let url2 = `http://${host}/accesslayer/${page}/cnews${
+            it.cnews
+          }/?platform=${chartName.split(" ")[0].match(/[a-z]+/)[0]}`;
           quality.push({
-            title: chartName+'总体耗时(95分位)',
+            title: chartName + "总体耗时(95分位)",
             url: `http://test.lg.webdev.com//appnews/News99_95/GetThreedailyCmpData?appid=${item}&t_type=${
               it.t_type
             }&uri=${this.appUri[chartName]}&code=1000&sdate=${this.GetDateStr(
@@ -269,9 +291,8 @@ export default {
             )}&stime=00:00&etime=23:59&edate=${this.GetDateStr(-1)}&data_type=${
               it.data_type
             }&pushmark=${it.pushmark}`,
-            handleAJaxData: this.handler,
-            describe:'双击图表跳转到详情页',
-            link:url2
+            describe: "双击图表进入详情页",
+            link: url2
             // param: {
             //   appid: item,
             //   t_type: it.t_type,
@@ -291,7 +312,8 @@ export default {
   watch: {
     $route: {
       handler: function() {
-        this.switchCharts("接入层");
+        let n = sessionStorage['menuSelect']?sessionStorage['menuSelect']:'接入层'
+        this.switchCharts(n);
         let pageTitle =
           this.$route.params.type == "kuaibao"
             ? "快报关键指标监控"
@@ -304,6 +326,7 @@ export default {
   methods: {
     ...mapActions(["getMonitorData"]),
     switchCharts(n) {
+      sessionStorage['menuSelect'] = n 
       // 只负责传递menu选中的数据,由computed来进行筛选
       this.menuSelection = n;
       let ids = this.$route.params.type == "kuaibao" ? this.kuaibao : this.news;
@@ -332,7 +355,8 @@ export default {
     }
   },
   created() {
-    this.switchCharts("接入层");
+    let n = sessionStorage['menuSelect']?sessionStorage['menuSelect']:'接入层'
+    this.switchCharts(n);
   }
 };
 </script>
