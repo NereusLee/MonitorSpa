@@ -28,6 +28,16 @@
                 </el-button>
             </el-tooltip>
             <Icon type="arrow-expand" @click="expand"></Icon>
+            <el-tooltip 
+                v-if="option.link"
+                class="item" 
+                effect="light" 
+                content="点击进入详情页" 
+                placement="right-start">
+                <el-button class='el-but'>
+                  <Icon type="ios-keypad" @click="linkTo"></Icon>
+                </el-button>
+            </el-tooltip>
             <div class="headTitle">{{option.title}}</div>
 
         </div>
@@ -62,6 +72,7 @@ import { mapMutations } from "vuex";
 import axios from "axios";
 import G2 from "@antv/g2";
 import DataSet from "@antv/data-set";
+import Brush from "@antv/g2-brush"
 
 const log = console.log.bind(this);
 
@@ -216,6 +227,12 @@ export default {
         compare: this.compare
       });
     },
+    linkTo(){
+        if(!this.option.link){
+          return
+        }
+        window.location.href = this.option.link
+    },
     showChart(data) {
       let names = [];
       data.data.forEach(item => {
@@ -269,12 +286,7 @@ export default {
         .select("rangeX");
 
       chart.render();
-      chart.on('plotdblclick',()=>{
-        if(!this.option.link){
-          return
-        }
-        window.location.href = this.option.link
-      })
+       
       chart.on("tooltip:change", ev => {
         let item = ev.items;
         if (item.length == 2) {
@@ -297,6 +309,21 @@ export default {
         this.compare = arr;
         this.current = item[0].value;
         this.time = item[1].title;
+      });
+      const brush = new Brush({  //拖拽放大
+        canvas: chart.get('canvas'),
+        chart,
+        type: 'X',
+        onBrushstart() {
+          chart.hideTooltip();
+        },
+        onBrushmove() {
+          chart.hideTooltip();
+        }
+      });
+      chart.on('plotdblclick', () => {
+        chart.get('options').filters = {};
+        chart.repaint();
       });
     }
   },

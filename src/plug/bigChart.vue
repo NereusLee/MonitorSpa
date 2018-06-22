@@ -29,7 +29,8 @@
 <script>
 import G2 from "@antv/g2";
 import DataSet from "@antv/data-set";
-import Slider from "@antv/g2-plugin-slider";
+// import Slider from "@antv/g2-plugin-slider";
+import Brush from "@antv/g2-brush"
 import { mapState } from "vuex";
 import { Icon } from "iview";
 
@@ -93,21 +94,6 @@ export default {
     }
   },
   methods: {
-    // handleAjaxData(data) {
-    //   return data.categories.map((element, index) => {
-    //     let obj = {};
-    //     data.data.forEach((item, key) => {
-    //       let obj2 = {
-    //         time: element
-    //       };
-    //       obj2[item.name.replace(/\d+\-0/, "").replace(/\-/, "月") + "日"] =
-    //         item.data[index];
-    //       obj = { ...obj, ...obj2 };
-    //     });
-    //     // chartData=[...chartData,...arr]
-    //     return obj;
-    //   });
-    // },
     showChart() {
       //   let names = ['今天','1天前','7天前']
       let chartData = this.handleAjaxData(this.bigChartData.chartData);
@@ -130,12 +116,12 @@ export default {
           key: "date", // key字段
           value: "value" // value字段
         })
-        .transform({
-          type: "filter",
-          callback: obj => {
-            return obj.time <= ds.state.end && obj.time >= ds.state.start;
-          }
-        });
+        // .transform({
+        //   type: "filter",
+        //   callback: obj => {
+        //     return obj.time <= ds.state.end && obj.time >= ds.state.start;
+        //   }
+        // });
     //   log(dv);
       const chart = new G2.Chart({
         container: "c1",
@@ -199,22 +185,37 @@ export default {
         this.current = item[0].value;
         this.time = item[1].title;
       });
-
-      const slider = new Slider({
-        container: "slider",
-        start: "05:00",
-        end: "07:00",
-        data: chartData, // !!! 注意是原始数据，不要传入 dv
-        xAxis: "time",
-        yAxis: "value",
-        height: 34,
-        onChange: ({ startText, endText }) => {
-          // !!! 更新状态量
-          ds.setState("start", startText);
-          ds.setState("end", endText);
+      const brush = new Brush({
+        canvas: chart.get('canvas'),
+        chart,
+        type: 'X',
+        onBrushstart() {
+          chart.hideTooltip();
+        },
+        onBrushmove() {
+          chart.hideTooltip();
         }
       });
-      slider.render();
+      chart.on('plotdblclick', () => {
+        chart.get('options').filters = {};
+        chart.repaint();
+      });
+
+      // const slider = new Slider({
+      //   container: "slider",
+      //   start: "05:00",
+      //   end: "07:00",
+      //   data: chartData, // !!! 注意是原始数据，不要传入 dv
+      //   xAxis: "time",
+      //   yAxis: "value",
+      //   height: 34,
+      //   onChange: ({ startText, endText }) => {
+      //     // !!! 更新状态量
+      //     ds.setState("start", startText);
+      //     ds.setState("end", endText);
+      //   }
+      // });
+      // slider.render();
     }
   },
   created() {

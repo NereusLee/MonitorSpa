@@ -220,10 +220,10 @@ export default {
       this.list.forEach(item => {
         array.push({
           title: item.title.split(" ")[2],
-          url: `/accesslayer/NewsMonitorAccesslayer/GetThreeDailyData?type=1&mixid=${
+          url: `http://test.lg.webdev.com/accesslayer/NewsMonitorAccesslayer/GetThreeDailyData?type=1&mixid=${
             item.mixid
           }&attrid=${item.attrid}`,
-          describe: `视图ID为${item.mixid},属性ID为${item.attrid}`
+          describe: `视图ID为${item.mixid},属性ID为${item.attrid} \n  双击图表恢复原尺寸`
         });
       });
       return array;
@@ -242,7 +242,7 @@ export default {
             ids.accessQualityList.queryMethod
           }/getConnTrend?metric=${item}&etime=23:59`,
           link: baseUrl + type + `?metric=${item}`,
-          describe: "双击图表进入详情页"
+          describe: "双击图表恢复原尺寸"
         });
       });
       return arr;
@@ -283,7 +283,7 @@ export default {
             )}&stime=00:00&etime=23:59&edate=${this.GetDateStr(-1)}&data_type=${
               it.data_type
             }&pushmark=${it.pushmark}`,
-            describe: "双击图表进入详情页",
+            describe: "双击图表恢复原尺寸",
             link: url2
           });
         });
