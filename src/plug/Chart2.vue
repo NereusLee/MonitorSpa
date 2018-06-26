@@ -39,7 +39,15 @@
                 </el-button>
             </el-tooltip>
             <div class="headTitle">{{option.title}}</div>
-
+            <el-tooltip 
+                class="item right-top" 
+                effect="light" 
+                content="导出Excel表格" 
+                placement="right-start">
+                <el-button class='el-but'>
+                  <Icon type="arrow-down-a" @click="downLoadSheet"></Icon>
+                </el-button>
+            </el-tooltip>
         </div>
         <ul class="comparison" v-if="compare">
             <li>
@@ -72,7 +80,9 @@ import { mapMutations } from "vuex";
 import axios from "axios";
 import G2 from "@antv/g2";
 import DataSet from "@antv/data-set";
-import Brush from "@antv/g2-brush"
+import Brush from "@antv/g2-brush";
+import xlsx from 'xlsx';
+
 
 const log = console.log.bind(this);
 
@@ -232,6 +242,9 @@ export default {
           return
         }
         window.location.href = this.option.link
+    },
+    downLoadSheet(){
+      
     },
     showChart(data) {
       let names = [];
@@ -428,8 +441,8 @@ export default {
   border: none;
   font-size: 18px;
   position: relative;
-  top: 8px;
-  left: 5px;
+  margin-left: 2px;
+  top: 7px;
   .ivu-icon {
     color: rgb(43, 133, 228);
   }
@@ -437,6 +450,11 @@ export default {
     background-color: rgb(255, 231, 147);
   }
 }
+.el-button.right-top{
+    position: absolute;
+    top:8px;
+    right: -12px;
+  }
 
 .comparison {
   overflow: hidden;
