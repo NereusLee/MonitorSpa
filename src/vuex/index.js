@@ -68,7 +68,8 @@ export default new Vuex.Store({
       series: []
     }
     ],
-    bigChartData: {}
+    bigChartData: {},
+    viewAttribute:{}
   },
   actions: {
     async getStartingMode (context, date) { // 获取启动方式分组的数据
@@ -96,6 +97,9 @@ export default new Vuex.Store({
   mutations: {
     changeBigChartData (state, v) {
       state.bigChartData = v
+    },
+    changeViewAttribute(state,v){
+      state.viewAttribute = v
     },
     changeCompareData (state, v) {
       state.compareData[v.id] = v.data
