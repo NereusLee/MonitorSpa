@@ -1,11 +1,9 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import axios from 'axios'
-import {
-  showChart
-} from '@/js/chart'
-import qs from 'qs'
-import $ from 'jquery'
+import {showChart} from '@/js/chart'
+// import qs from 'qs'
+// import $ from 'jquery'
 
 Vue.use(Vuex)
 

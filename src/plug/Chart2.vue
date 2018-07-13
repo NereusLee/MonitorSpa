@@ -1,6 +1,4 @@
 <script>
-import { mapState } from 'vuex'
-
 /**
  * Created by v_yingdli
  * 该组件需传入的props为:
@@ -11,7 +9,6 @@ import { mapState } from 'vuex'
  *  describe:String  图表的详情描述
  * }
  * handleAjaxData:function  处理传入数据的函数
- * 打包前改接口的地址
  */
 </script>
 
@@ -33,7 +30,7 @@ import { mapState } from 'vuex'
             <!-- 放大按钮 -->
             <Icon type="arrow-expand" @click="expand"></Icon>
             <!-- 设置视图属性 -->
-            <el-tooltip class="item" content="设置视图属性" placement="bottom-start">
+            <el-tooltip v-if="option.setting" class="item" content="告警配置" placement="bottom-start">
                 <el-button class='el-but' @click="getViewAttribute">
                   <Icon type="gear-a"></Icon>
                 </el-button>
@@ -132,20 +129,7 @@ export default {
       outFile:'',
       loading: false,
       error: false,
-      viewSetting:false,
-      viewAttribute:{
-        attrid:-1,
-        maxalertid:-1,
-        maxvalue:-1,
-        maxcautionvalue:-1,
-        minalertid:-1,
-        minvalue:-1,
-        mincautionvalue:-1,
-        wavealertid:-1,
-        waveminvalue:-1,
-        wavemaxvalue:-1,
-        wavecautionvalue:-1,
-      }
+      viewSetting:false
     };
   },
   watch: {
@@ -168,25 +152,40 @@ export default {
     getViewAttribute(){  //视图设置窗口
       this.$emit('viewAttr')
       axios({
-        // method:'get',
-        // url:'https://api.myjson.com/bins/jtuea',
         method: 'post',
-        url: 'http://test.lg.webdev.com/proxy/monitorRequest',
+        url: '/proxy/monitorRequest',
         data:qs.stringify({
               viewid:this.option.mixid,
               dateint:(new Date()).getTime(), //当前时间戳
               action:'loadfillmyviewattr'
         }),
       }).then(res=>{
-        let viewAttr =[]
-        if(!res.data.alertdata || res.data.alertdata.length==0) {
-          viewAttr[0] = this.viewAttribute
-        }else{
-          viewAttr = res.data.alertdata.filter(item=>{
-            return item.attrid == this.option.attrid
-          })
+        // log(res)
+        let viewAttr = res.data.alertdata.filter(item=>{
+          return item.attrid == this.option.attrid
+        })
+        let obj = {
+          attrid: this.option.attrid,
+          mixid : this.option.mixid,
+          owner: res.data.configdata.owner
         }
-        this.changeViewAttribute(viewAttr[0])
+        viewAttr = viewAttr[0]?viewAttr[0]:{
+          attrid:-1,
+          maxalertid:-1,
+          maxcautionvalue:-1,
+          maxvalue:-1,
+          minalertid:-1,
+          mincautionvalue:-1,
+          minvalue:-1,
+          wavealertid:-1,
+          wavecautionvalue:-1,
+          wavemaxvalue:-1,
+          waveminvalue:-1
+        }
+        Object.assign(viewAttr,obj)
+        // viewAttr.attrid = this.option.attrid
+        // viewAttr.mixid = this.option.mixid
+        this.changeViewAttribute(viewAttr)
       })
     },
     comparison(num1, num2) {
@@ -293,7 +292,6 @@ export default {
         window.location.href = this.option.link
     },
     downLoadSheet(rs){
-      // log(rs)
       let data = [{}]
       for (let k in rs[0]) {
         data[0][k] = k
@@ -327,7 +325,7 @@ export default {
             })
         }
       }
-      log(tmpWB)
+      // log(tmpWB)
       let tmpDown = new Blob([this.s2ab(XLSX.write(tmpWB,
         {bookType: (type === undefined ? 'xlsx' : type), bookSST: false, type: 'binary'} // 这里的数据是用来定义导出的格式类型
       ))], {
@@ -518,7 +516,10 @@ export default {
     height: 50px;
     line-height: 50px;
     font-weight: 800;
-    position: relative;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-30%, -50%);
     overflow: hidden;
   }
   .headTitle::after {
