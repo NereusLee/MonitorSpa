@@ -111,6 +111,7 @@ export default new Vuex.Store({
     changeStartingMode (state, res) { // 接入方式接口数据
       let firstTitle = []
       let sm = res.data.data
+      log
       let categories = res.data.categories.map(item => { // 时间,横坐标
         return `${item.slice(4, 6).match(/[1-9]+/)[0]}月${item.slice(6)}日`
       })

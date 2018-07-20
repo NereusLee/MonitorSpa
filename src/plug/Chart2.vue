@@ -115,7 +115,8 @@ export default {
   },
   components: {
     Icon,
-    Spin
+    Spin,
+    // Tooltip
   },
   data() {
     return {

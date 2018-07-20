@@ -238,7 +238,7 @@ export default {
       this.list.forEach(item => {
         array.push({
           title: item.title.split(" ")[2],
-          url: `/accesslayer/NewsMonitorAccesslayer/GetThreeDailyData?type=1&mixid=${
+          url: `http://test.lg.webdev.com/accesslayer/NewsMonitorAccesslayer/GetThreeDailyData?type=1&mixid=${
             item.mixid
           }&attrid=${item.attrid}`,
           describe: `视图ID为${item.mixid},属性ID为${
@@ -253,8 +253,8 @@ export default {
     },
     accessList() {
       let ids = this.$route.params.type == "kuaibao" ? this.kuaibao : this.news;
-      let host = window.location.host;
-      // let host = 'test.lg.webdev.com'
+      // let host = window.location.host;
+      let host = 'yd.lg.webdev.com'
       let baseUrl = `http://${host}/accesslayer/${
         ids.accessQualityList.queryMethod
       }/`;
@@ -264,7 +264,7 @@ export default {
       ids.accessQualityList.metric.forEach(item => {
         arr.push({
           title: "接入层整体" + this.CName[item],
-          url: `/accesslayer/${
+          url: `http://${host}/accesslayer/${
             ids.accessQualityList.queryMethod
           }/getConnTrend?metric=${item}&etime=23:59`,
           link: baseUrl + type + `?metric=${item}`,
