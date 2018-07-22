@@ -319,7 +319,8 @@ export default {
   },
   watch: {
     $route: {
-      handler: function() {
+      handler: function(m) {
+        log(m)
         let n = sessionStorage["menuSelect"]
           ? sessionStorage["menuSelect"]
           : "接入层";
