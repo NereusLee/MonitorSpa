@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import pvuv from '@/components/pvuv'
-import monitor from '@/components/monitor'
+import pvuv from '@/views/pvuv'
+import monitor from '@/views/monitor'
 
 Vue.use(Router)
 

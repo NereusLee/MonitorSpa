@@ -79,11 +79,11 @@
 
 <script>
 import { mapActions, mapState } from "vuex";
-import chart2 from "@/plug/Chart2";
-import myMenu from "@/plug/myMenu";
+import chart2 from "@/components/Chart2";
+import myMenu from "@/components/myMenu";
 import { Button, Modal } from "iview";
-import bigChart from "@/plug/bigChart";
-import ViewAttributeSetting from "@/plug/viewAttributeSetting";
+import bigChart from "@/components/bigChart";
+import ViewAttributeSetting from "@/components/viewAttributeSetting";
 
 const log = console.log.bind(this);
 

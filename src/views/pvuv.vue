@@ -23,9 +23,9 @@
 <script>
 import {mapState, mapActions, mapMutations} from 'vuex'
 // 导入chart组件
-import chart from '@/plug/Chart.vue'
+import chart from '@/components/Chart.vue'
 import checkBox from '@/components/checkbox'
-import QueryCondition from '@/plug/QueryCondition'
+import QueryCondition from '@/components/QueryCondition'
 import axios from 'axios'
 // import { LOADIPHLPAPI } from 'dns';
 import { loadavg } from 'os';
