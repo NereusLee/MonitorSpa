@@ -1,13 +1,19 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import pvuv from '@/components/pvuv'
-import monitor from '@/components/monitor'
-import test from '@/components/test'
+import App from '@/views/app/App'
+import pvuv from '@/views/pvuv/pvuv'
+import monitor from '@/views/monitor/monitor'
 
 Vue.use(Router)
 
 export default new Router({
+  mode:'history',
   routes: [
+    {
+      path: '/',
+      name: 'app',
+      component: App
+    },
     {
       path: '/pvuv/:id',
       name: 'pvuv',
@@ -17,11 +23,6 @@ export default new Router({
       path: '/monitor/:type',
       component: monitor,
       name: 'monitor'
-    },
-    {
-      path: '/test',
-      name: 'test',
-      component: test
     }
   ]
 })

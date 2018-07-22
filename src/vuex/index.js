@@ -2,8 +2,8 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import axios from 'axios'
 import {showChart} from '@/js/chart'
-import qs from 'qs'
-import $ from 'jquery'
+// import qs from 'qs'
+// import $ from 'jquery'
 
 Vue.use(Vuex)
 
@@ -11,10 +11,10 @@ const log = console.log.bind(this)
 
 function GetDateStr (AddDayCount) {
   var dd = new Date()
-  dd.setDate(dd.getDate() + AddDayCount)// 获取AddDayCount天后的日期
+  dd.setDate(dd.getDate() + AddDayCount) // 获取AddDayCount天后的日期
   var y = dd.getFullYear()
-  var m = (dd.getMonth() + 1) < 10 ? '0' + (dd.getMonth() + 1) : (dd.getMonth() + 1)// 获取当前月份的日期，不足10补0
-  var d = dd.getDate() < 10 ? '0' + dd.getDate() : dd.getDate()// 获取当前几号，不足10补0
+  var m = (dd.getMonth() + 1) < 10 ? '0' + (dd.getMonth() + 1) : (dd.getMonth() + 1) // 获取当前月份的日期，不足10补0
+  var d = dd.getDate() < 10 ? '0' + dd.getDate() : dd.getDate() // 获取当前几号，不足10补0
   return '' + y + m + d
 }
 
@@ -45,28 +45,29 @@ export default new Vuex.Store({
     startingMode: [], // 启动方式的数据
     myChannels: `news_news_top,news_news_ent,news_news_finance,news_news_sports,news_news_tech,news_topic`,
     channelsData: [],
-    opt: [
-      {
-        id: 'articlepv',
-        cnName: '图文PV',
-        series: []
-      },
-      {
-        id: 'articleuv',
-        cnName: '图文UV',
-        series: []
-      },
-      {
-        id: 'videouv',
-        cnName: '视频UV',
-        series: []
-      },
-      {
-        id: 'videovv',
-        cnName: '视频PV',
-        series: []
-      }
+    opt: [{
+      id: 'articlepv',
+      cnName: '图文PV',
+      series: []
+    },
+    {
+      id: 'articleuv',
+      cnName: '图文UV',
+      series: []
+    },
+    {
+      id: 'videouv',
+      cnName: '视频UV',
+      series: []
+    },
+    {
+      id: 'videovv',
+      cnName: '视频PV',
+      series: []
+    }
     ],
+    bigChartData: {},
+    viewAttribute:{}
   },
   actions: {
     async getStartingMode (context, date) { // 获取启动方式分组的数据
@@ -80,15 +81,24 @@ export default new Vuex.Store({
     async getChannelsData (context) { // 获取按频道分组的数据
       context.commit('changeLoading')
       let seDate = [GetDateStr(-7), GetDateStr(-1)]
-      let arg = arguments[1] || {date: seDate, channel: `news_news_top,news_news_ent,news_news_finance,news_news_sports,news_news_tech,news_topic`}
+      let arg = arguments[1] || {
+        date: seDate,
+        channel: `news_news_top,news_news_ent,news_news_finance,news_news_sports,news_news_tech,news_topic`
+      }
       // console.log(arg.date[0])
       let url = `/accesslayer/NewsdailyPVUV/GetChanelPvUvData?sdate=${arg.date[0]}&edate=${arg.date[1]}&channels=${arg.channel}`
       let data = await axios(url)
       // let data = await axios('https://api.myjson.com/bins/150pce')
       context.commit('changeChannelsData', data)
-    },
+    }
   },
   mutations: {
+    changeBigChartData (state, v) {
+      state.bigChartData = v
+    },
+    changeViewAttribute(state,v){
+      state.viewAttribute = v
+    },
     changeCompareData (state, v) {
       state.compareData[v.id] = v.data
     },
@@ -101,6 +111,7 @@ export default new Vuex.Store({
     changeStartingMode (state, res) { // 接入方式接口数据
       let firstTitle = []
       let sm = res.data.data
+      log
       let categories = res.data.categories.map(item => { // 时间,横坐标
         return `${item.slice(4, 6).match(/[1-9]+/)[0]}月${item.slice(6)}日`
       })

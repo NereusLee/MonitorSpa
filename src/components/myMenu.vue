@@ -9,9 +9,9 @@
     </Menu>
 </template>
 <script>
-import {Menu, MenuItem, Icon, MenuGroup} from 'iview'
+import { Menu, MenuItem, Icon, MenuGroup } from "iview";
 export default {
-  name: 'myMenu',
+  name: "myMenu",
   props: {
     theme: {
       type: String
@@ -27,39 +27,41 @@ export default {
     }
   },
   components: {
-    Menu, MenuItem, Icon, MenuGroup
+    Menu,
+    MenuItem,
+    Icon,
+    MenuGroup
   },
   methods: {
-    select (n) {
-      this.$emit('switchCharts', n)
+    select(n) {
+      this.$emit("switchCharts", n);
     }
   },
   computed: {
-    title () {
-      let rou = this.$route.params.type
-      let tt = '关键指标监控'
+    title() {
+      let rou = this.$route.params.type;
+      let tt = "关键指标监控";
       switch (rou) {
-        case 'news':
-          tt = '新闻' + tt
-          break
-        case 'kuaibao':
-          tt = '快报' + tt
-          break
+        case "news":
+          tt = "新闻" + tt;
+          break;
+        case "kuaibao":
+          tt = "快报" + tt;
+          break;
       }
-      return tt
+      return tt;
     }
-
   },
-  mounted () {
-    this.$nextTick(function () {
-        this.$refs.side_menu.updateActiveName()
-    })
+  mounted() {
+    this.$nextTick(function() {
+      this.$refs.side_menu.updateActiveName();
+    });
   }
-}
+};
 </script>
 
 <style scoped>
-    .ivu-menu{
-        /*width: 240px;*/
-    }
+.ivu-menu {
+  /*width: 240px;*/
+}
 </style>
