@@ -5,7 +5,7 @@
         </div>
         <el-row style="margin-left: 17px;">
             <el-col :span="24">
-                <query-condition :rou="this.$route.params.id"></query-condition>
+                <query-condition :rou="this.$route.path"></query-condition>
             </el-col>
         </el-row>
             <div id="charts">
@@ -26,9 +26,8 @@ import { mapState, mapActions, mapMutations } from "vuex";
 import chart from "@/components/Chart.vue";
 import checkBox from "@/components/checkbox";
 import QueryCondition from "@/components/QueryCondition";
-import axios from "axios";
 // import { LOADIPHLPAPI } from 'dns';
-import { loadavg } from "os";
+// import { loadavg } from "os";
 import { Spin } from "iview";
 
 function GetDateStr(AddDayCount) {
@@ -79,20 +78,21 @@ export default {
       this.list = this.channelsData;
     },
     $route(m) {
-      let n = m.params.id;
+      log(m)
+      let n = m.path;
       this.repaint(n);
     }
   },
   methods: {
     ...mapActions(["getStartingMode", "getChannelsData"]),
     repaint(n) {
-      if (n == "startStyle") {
+      if (n == "/startStyle") {
         let seDate = [GetDateStr(-7), GetDateStr(-1)];
         this.getStartingMode(seDate).then(() => {
           this.list = this.startingMode;
           this.loading = false;
         });
-      } else if (n == "channel") {
+      } else if (n == "/channel") {
         this.getChannelsData().then(() => {
           this.list = this.channelsData;
           this.loading = false;
@@ -103,7 +103,7 @@ export default {
     }
   },
   async created() {
-    let n = this.$route.params.id;
+    let n = this.$route.path;
     this.repaint(n);
   }
 };

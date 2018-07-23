@@ -3,13 +3,13 @@
 import Vue from 'vue'
 import monitor from './monitor.vue'
 import router from '@/router'
-import {showChart} from '@/js/chart'
+import { showChart } from '@/js/chart'
 import axios from 'axios'
 import store from '@/vuex'
 // import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import 'iview/dist/styles/iview.css'
-import {Row, Col, DatePicker, Button, Tooltip, Option, Select} from 'element-ui'
+import { Row, Col, DatePicker, Button, Tooltip, Option, Select } from 'element-ui'
 // import ViserVue from 'viser-vue'
 import G2 from '@antv/g2'
 import '@/assets/animate.min.css'
@@ -31,6 +31,15 @@ Vue.prototype.$showChart = showChart
 Vue.prototype.$axios = axios
 Vue.prototype.$log = console.log
 
+// new Router({
+//   routes:[
+//     {
+//       path: '/pvuv/:id',
+//       name: 'pvuv',
+//       component: pvuv
+//     },
+//   ]
+// })
 
 new Vue({
   router,

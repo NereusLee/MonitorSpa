@@ -22,20 +22,20 @@
         <Spin size="large" fix v-if="loading"></Spin>
         <div class="chart-head">
             <!--介绍文字和图标-->
-            <el-tooltip class="item" :content="option.describe" placement="bottom-start">
+            <Tooltip class="item" :content="option.describe" placement="bottom-start">
                 <el-button class='el-but'>
                     <Icon type="information-circled"></Icon>
                 </el-button>
-            </el-tooltip>
+            </Tooltip>
             <!-- 放大按钮 -->
             <Icon type="arrow-expand" @click="expand"></Icon>
             <!-- 设置视图属性 -->
-            <el-tooltip v-if="option.setting" class="item" content="告警配置" placement="bottom-start">
+            <Tooltip v-if="option.setting" class="item" content="告警配置" placement="bottom-start">
                 <el-button class='el-but' @click="getViewAttribute">
                   <Icon type="gear-a"></Icon>
                 </el-button>
-            </el-tooltip>
-            <el-tooltip
+            </Tooltip>
+            <Tooltip
                 v-if="option.link"
                 class="item"
                 effect="light"
@@ -44,16 +44,16 @@
                 <el-button class='el-but'>
                   <Icon type="ios-keypad" @click="linkTo"></Icon>
                 </el-button>
-            </el-tooltip>
+            </Tooltip>
             <div class="headTitle">{{option.title}}</div>
-            <el-tooltip
+            <Tooltip
                 class="item right-top"
                 content="导出Excel表格"
                 placement="bottom-start">
                 <el-button class='el-but'>
                   <Icon type="arrow-down-a" @click="downLoadSheet(excelData)"></Icon>
                 </el-button>
-            </el-tooltip>
+            </Tooltip>
         </div>
         <ul class="comparison" v-if="compare">
             <li>
@@ -81,7 +81,7 @@
     </div>
 </template>
 <script>
-import { Icon, Spin} from "iview";
+import { Icon, Spin, Tooltip} from "iview";
 import { mapMutations} from "vuex";
 import axios from "axios";
 import G2 from "@antv/g2";
@@ -116,7 +116,7 @@ export default {
   components: {
     Icon,
     Spin,
-    // Tooltip
+    Tooltip
   },
   data() {
     return {
@@ -556,7 +556,7 @@ export default {
   .ivu-icon {
     color: rgb(43, 133, 228);
   }
-  .el-tooltip__popper is-light {
+  .Tooltip__popper is-light {
     background-color: rgb(255, 231, 147);
   }
 }

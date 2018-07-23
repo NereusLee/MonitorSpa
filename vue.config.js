@@ -3,7 +3,7 @@ module.exports = {
   runtimeCompiler: true,
   lintOnSave:true,
   assetsDir: "static",
-  mode:'production',
+  // mode:'production',
   pages:{
     // app: {
     //   entry: "src/views/app/main.js",
@@ -12,9 +12,9 @@ module.exports = {
     //   title: "Monitor Page"
     // },
     monitor: {
-        entry: "src/views/monitor/monitor.vue",
+        entry: "src/views/monitor/main.js",
         template: "public/index.html",
-        filename: "monitor",
+        filename: "monitor.html",
         title: "Monitor Page"
       },
       pvuv: {

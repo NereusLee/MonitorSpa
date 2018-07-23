@@ -31,9 +31,9 @@
                     </div>
                 </Modal>
             <!-- </div> -->
-            <el-row :gutter="40">
-                <el-col
-                        :span="8"
+            <Row :gutter="40">
+                <Col
+                        span="8"
                         v-for="(x,index) in listOption"
                         :key="'chart'+index"
                 >
@@ -46,10 +46,9 @@
                             :handleAjaxData='handler'
                             @viewAttr="viewAttribute"
                     ></chart2>
-
-                </el-col>
+                </Col>
                 <!--接入层质量接口-->
-                <el-col :span="8" v-for="(x,index) in accessList" :key="'access'+index">
+                <Col span="8" v-for="(x,index) in accessList" :key="'access'+index">
                     <chart2
                             class="animated bounceInUp"
                             @expand="bigger"
@@ -58,11 +57,11 @@
                             v-if="menuSelection=='接入层'"
                             :handleAjaxData='handler'
                     ></chart2>
-                </el-col>
+                </Col>
                 <!-- APP质量 -->
-                <el-col
+                <Col
                         v-if="menuSelection=='APP质量'"
-                        :span="8" v-for="(x,index) in appQualityList"
+                        span="8" v-for="(x,index) in appQualityList"
                         :key="'app'+index">
                     <chart2
                             class="animated bounceInUp"
@@ -71,8 +70,8 @@
                             :option = 'x'
                             :handleAjaxData='handler'
                     ></chart2>
-                </el-col>
-            </el-row>
+                </Col>
+            </Row>
         </div>
     </div>
 </template>
@@ -81,7 +80,7 @@
 import { mapActions, mapState } from "vuex";
 import chart2 from "@/components/Chart2";
 import myMenu from "@/components/myMenu";
-import { Button, Modal } from "iview";
+import { Button, Modal, Row, Col } from "iview";
 import bigChart from "@/components/bigChart";
 import ViewAttributeSetting from "@/components/viewAttributeSetting";
 
@@ -95,7 +94,9 @@ export default {
     myMenu,
     chart2,
     Modal,
-    bigChart
+    bigChart,
+    Row,
+    Col
   },
   data() {
     return {
@@ -225,12 +226,12 @@ export default {
           return obj;
         });
       },
-      modalLoading:true,
+      modalLoading: true
     };
   },
   computed: {
     menuList() {
-      let ids = this.$route.params.type == "kuaibao" ? this.kuaibao : this.news;
+      let ids = this.$route.fullPath == "/kuaibao" ? this.kuaibao : this.news;
       return ids.menuList;
     },
     listOption() {
@@ -238,7 +239,7 @@ export default {
       this.list.forEach(item => {
         array.push({
           title: item.title.split(" ")[2],
-          url: `http://test.lg.webdev.com/accesslayer/NewsMonitorAccesslayer/GetThreeDailyData?type=1&mixid=${
+          url: `/accesslayer/NewsMonitorAccesslayer/GetThreeDailyData?type=1&mixid=${
             item.mixid
           }&attrid=${item.attrid}`,
           describe: `视图ID为${item.mixid},属性ID为${
@@ -252,19 +253,17 @@ export default {
       return array;
     },
     accessList() {
-      let ids = this.$route.params.type == "kuaibao" ? this.kuaibao : this.news;
+      let ids = this.$route.fullPath == "/kuaibao" ? this.kuaibao : this.news;
       // let host = window.location.host;
-      let host = 'yd.lg.webdev.com'
-      let baseUrl = `http://${host}/accesslayer/${
+      let baseUrl = `/accesslayer/${
         ids.accessQualityList.queryMethod
       }/`;
-      let type =
-        this.$route.params.type == "kuaibao" ? "cnewscode" : "inewscode";
+      let type = this.$route.fullPath == "/kuaibao" ? "cnewscode" : "inewscode";
       let arr = [];
       ids.accessQualityList.metric.forEach(item => {
         arr.push({
           title: "接入层整体" + this.CName[item],
-          url: `http://${host}/accesslayer/${
+          url: `/accesslayer/${
             ids.accessQualityList.queryMethod
           }/getConnTrend?metric=${item}&etime=23:59`,
           link: baseUrl + type + `?metric=${item}`,
@@ -274,12 +273,10 @@ export default {
       return arr;
     },
     appQualityList() {
-      let ids = this.$route.params.type == "kuaibao" ? this.kuaibao : this.news;
+      let ids = this.$route.fullPath == "/kuaibao" ? this.kuaibao : this.news;
       // if(this.menuSelection!=='APP质量') return {}
       let page =
-        this.$route.params.type == "kuaibao"
-          ? "KuaibaoQuality"
-          : "InewsQuality";
+        this.$route.fullPath == "/kuaibao" ? "KuaibaoQuality" : "InewsQuality";
       let type = ids.appid;
       let host = window.location.host;
       // let host = "test.lg.webdev.com";
@@ -297,7 +294,7 @@ export default {
             chartName =
               this.appQualityName[item] + " " + this.appQualityName[it.t_type];
           }
-          let url2 = `http://${host}/accesslayer/${page}/cnews${
+          let url2 = `/accesslayer/${page}/cnews${
             it.cnews
           }/?platform=${chartName.split(" ")[0].match(/[a-z]+/)[0]}`;
           quality.push({
@@ -320,13 +317,12 @@ export default {
   watch: {
     $route: {
       handler: function(m) {
-        log(m)
         let n = sessionStorage["menuSelect"]
           ? sessionStorage["menuSelect"]
           : "接入层";
         this.switchCharts(n);
         let pageTitle =
-          this.$route.params.type == "kuaibao"
+          this.$route.fullPath == "/kuaibao"
             ? "快报关键指标监控"
             : "新闻关键指标监控";
         document.title = pageTitle;
@@ -340,7 +336,7 @@ export default {
       sessionStorage["menuSelect"] = n;
       // 只负责传递左边menu选中的数据,由computed来进行筛选
       this.menuSelection = n;
-      let ids = this.$route.params.type == "kuaibao" ? this.kuaibao : this.news;
+      let ids = this.$route.fullPath == "/kuaibao" ? this.kuaibao : this.news;
       let arr = ids.list.filter(item => {
         return item.title.match(n);
       });
@@ -364,7 +360,6 @@ export default {
     asyncClose() {
       setTimeout(() => {
         this.viewAttr = false;
-        log("close");
       }, 1500);
     },
     viewSetting() {
@@ -382,7 +377,7 @@ export default {
 
 <style lang="scss" scoped>
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  font-family: "Avenir", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
@@ -429,14 +424,14 @@ body {
       }
     }
 
-    el-row {
-      .el-col {
+    Row {
+      .col {
         padding-top: 20%;
         margin-bottom: 40px;
         overflow: hidden;
         /*max-height: 400px!important;*/
       }
-      .el-col:before {
+      .col:before {
         content: "";
         display: inline-block;
         padding-bottom: 100%;
