@@ -1,10 +1,10 @@
-import Vue from 'vue'
-import Router from 'vue-router'
+import Vue from "vue";
+import Router from "vue-router";
 // import App from '@/views/app/App'
-import pvuv from '@/views/pvuv/pvuv'
-import monitor from '@/views/monitor/monitor'
+import pvuv from "@/views/pvuv/pvuv";
+import monitor from "@/views/monitor/monitor";
 
-Vue.use(Router)
+Vue.use(Router);
 
 export default new Router({
   // mode:'history',
@@ -15,14 +15,14 @@ export default new Router({
     //   component: App
     // },
     {
-      path: '/pvuv/:id',
-      name: 'pvuv',
+      path: "/pvuv/:id",
+      name: "pvuv",
       component: pvuv
     },
     {
-      path: '/monitor/:type',
+      path: "/monitor/:type",
       component: monitor,
-      name: 'monitor'
+      name: "monitor"
     }
   ]
-})
+});

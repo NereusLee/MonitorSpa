@@ -30,7 +30,7 @@
 import G2 from "@antv/g2";
 import DataSet from "@antv/data-set";
 // import Slider from "@antv/g2-plugin-slider";
-import Brush from "@antv/g2-brush"
+import Brush from "@antv/g2-brush";
 import { mapState } from "vuex";
 import { Icon } from "iview";
 
@@ -39,7 +39,7 @@ function comparison(num1, num2) {
   num1 = Number(num1);
   num2 = Number(num2);
   // 计算变化率
-  let rate = Math.round((num1 - num2) / num2 * 10000) / 100 + "%";
+  let rate = Math.round(((num1 - num2) / num2) * 10000) / 100 + "%";
   if (num1 > num2) {
     return {
       color: "green",
@@ -57,7 +57,7 @@ function comparison(num1, num2) {
 
 export default {
   props: {
-      handleAjaxData:{}
+    handleAjaxData: {}
   },
   data() {
     return {
@@ -104,25 +104,24 @@ export default {
       const ds = new DataSet({
         state: {
           start: "05:00",
-          end: "07:00",
+          end: "07:00"
         }
       });
       const dv = ds.createView().source(chartData);
 
-      dv
-        .transform({
-          type: "fold",
-          fields: names, // 展开字段集
-          key: "date", // key字段
-          value: "value" // value字段
-        })
-        // .transform({
-        //   type: "filter",
-        //   callback: obj => {
-        //     return obj.time <= ds.state.end && obj.time >= ds.state.start;
-        //   }
-        // });
-    //   log(dv);
+      dv.transform({
+        type: "fold",
+        fields: names, // 展开字段集
+        key: "date", // key字段
+        value: "value" // value字段
+      });
+      // .transform({
+      //   type: "filter",
+      //   callback: obj => {
+      //     return obj.time <= ds.state.end && obj.time >= ds.state.start;
+      //   }
+      // });
+      //   log(dv);
       const chart = new G2.Chart({
         container: "c1",
         forceFit: true,
@@ -165,7 +164,7 @@ export default {
       chart.on("tooltip:change", ev => {
         let item = ev.items;
         if (item.length == 2) {
-          item.unshift({ title:item[1].title,name: "今天", value: 0 });
+          item.unshift({ title: item[1].title, name: "今天", value: 0 });
         }
         let day = comparison(item[0].value, item[1].value);
         let week = comparison(item[0].value, item[2].value);
@@ -186,9 +185,9 @@ export default {
         this.time = item[1].title;
       });
       const brush = new Brush({
-        canvas: chart.get('canvas'),
+        canvas: chart.get("canvas"),
         chart,
-        type: 'X',
+        type: "X",
         onBrushstart() {
           chart.hideTooltip();
         },
@@ -196,8 +195,8 @@ export default {
           chart.hideTooltip();
         }
       });
-      chart.on('plotdblclick', () => {
-        chart.get('options').filters = {};
+      chart.on("plotdblclick", () => {
+        chart.get("options").filters = {};
         chart.repaint();
       });
 
@@ -227,7 +226,7 @@ export default {
   },
   mounted() {
     // this.$nextTick(() => {
-      this.showChart();
+    this.showChart();
     // });
   }
 };

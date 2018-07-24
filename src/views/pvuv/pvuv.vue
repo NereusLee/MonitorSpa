@@ -78,7 +78,7 @@ export default {
       this.list = this.channelsData;
     },
     $route(m) {
-      log(m)
+      log(m);
       let n = m.path;
       this.repaint(n);
     }

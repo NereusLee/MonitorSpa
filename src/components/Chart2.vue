@@ -1,4 +1,6 @@
 <script>
+import { error } from "util";
+
 /**
  * Created by v_yingdli
  * 该组件需传入的props为:
@@ -22,37 +24,38 @@
         <Spin size="large" fix v-if="loading"></Spin>
         <div class="chart-head">
             <!--介绍文字和图标-->
-            <Tooltip class="item" :content="option.describe" placement="bottom-start">
-                <el-button class='el-but'>
-                    <Icon type="information-circled"></Icon>
-                </el-button>
+            <Tooltip transfer class="el-button"  :content="option.describe" placement="bottom-start">
+                <!-- <Button class='el-button'> -->
+                    <Icon type="information-circled" size="20"></Icon>
+                <!-- </Button> -->
             </Tooltip>
             <!-- 放大按钮 -->
-            <Icon type="arrow-expand" @click="expand"></Icon>
-            <!-- 设置视图属性 -->
-            <Tooltip v-if="option.setting" class="item" content="告警配置" placement="bottom-start">
-                <el-button class='el-but' @click="getViewAttribute">
-                  <Icon type="gear-a"></Icon>
-                </el-button>
+            <Tooltip transfer class="el-button"  content="放大图表" placement="bottom">
+              <Icon type="arrow-expand" @click="expand" size="20"></Icon>
             </Tooltip>
-            <Tooltip
+            <!-- 设置视图属性 -->
+            <Tooltip transfer class='el-button' v-if="option.setting"
+                content="告警配置"
+                placement="bottom"
+            >
+                  <Icon size="20" @click="getViewAttribute" type="gear-a" ></Icon>
+            </Tooltip>
+            <Tooltip transfer class="el-button"
                 v-if="option.link"
-                class="item"
-                effect="light"
                 content="点击进入详情页"
-                placement="bottom-start">
-                <el-button class='el-but'>
-                  <Icon type="ios-keypad" @click="linkTo"></Icon>
-                </el-button>
+                placement="bottom">
+                <!-- <Button type="info" class='el-but'> -->
+                  <Icon size="20"  type="ios-keypad" @click="linkTo"></Icon>
+                <!-- </Button> -->
             </Tooltip>
             <div class="headTitle">{{option.title}}</div>
             <Tooltip
-                class="item right-top"
+transfer                 class="item el-button right-top"
                 content="导出Excel表格"
-                placement="bottom-start">
-                <el-button class='el-but'>
-                  <Icon type="arrow-down-a" @click="downLoadSheet(excelData)"></Icon>
-                </el-button>
+                placement="bottom-end">
+                <!-- <Button type="info" class='el-but'> -->
+                  <Icon size="20"  type="arrow-down-a" @click="downLoadSheet(excelData)"></Icon>
+                <!-- </Button> -->
             </Tooltip>
         </div>
         <ul class="comparison" v-if="compare">
@@ -81,21 +84,21 @@
     </div>
 </template>
 <script>
-import { Icon, Spin, Tooltip} from "iview";
-import { mapMutations} from "vuex";
+import { Icon, Spin, Tooltip, Button } from "iview";
+import { mapMutations } from "vuex";
 import axios from "axios";
 import G2 from "@antv/g2";
 import DataSet from "@antv/data-set";
 import Brush from "@antv/g2-brush";
-import XLSX from 'xlsx';
-import qs from 'qs'
+import XLSX from "xlsx";
+import qs from "qs";
 
 const log = console.log.bind(this);
 
 function randomString(len) {
   // 随机生成字符串  用来做id
   len = len || 32;
-  var $chars = "abcdefhijkmnprstwxyz2345678";
+  var $chars = "abcdefhijkmnprstwxyz";
   /** **默认去掉了容易混淆的字符oOLl,9gq,Vv,Uu,I1****/
   var maxPos = $chars.length;
   var pwd = "";
@@ -116,7 +119,8 @@ export default {
   components: {
     Icon,
     Spin,
-    Tooltip
+    Tooltip,
+    Button
   },
   data() {
     return {
@@ -124,13 +128,13 @@ export default {
       compare: [],
       time: "",
       current: 0, // 初始值
-      monitorData: {},//存放从接口处或获取的数据,用于渲染图表和传给放大的图表
-      compareData: [1,2,3],
-      excelData:[],
-      outFile:'',
+      monitorData: {}, //存放从接口处或获取的数据,用于渲染图表和传给放大的图表
+      compareData: [1, 2, 3],
+      excelData: [],
+      outFile: "",
       loading: false,
       error: false,
-      viewSetting:false
+      viewSetting: false
     };
   },
   watch: {
@@ -139,8 +143,10 @@ export default {
     }
   },
   methods: {
-    ...mapMutations(["changeBigChartData",'changeViewAttribute']),
-    refresh() {  //刷新图表
+    ...mapMutations(["changeBigChartData", "changeViewAttribute"]),
+    refresh() {
+      //刷新图表
+      this.error = false;
       this.time = this.now();
       this.getMonitorData().then(() => {
         // 保证在compareInit执行时this.compareData有值
@@ -150,50 +156,53 @@ export default {
         });
       });
     },
-    getViewAttribute(){  //视图设置窗口
-      this.$emit('viewAttr')
+    getViewAttribute() {
+      //视图设置窗口
+      this.$emit("viewAttr");
       axios({
-        method: 'post',
-        url: '/proxy/monitorRequest',
-        data:qs.stringify({
-              viewid:this.option.mixid,
-              dateint:(new Date()).getTime(), //当前时间戳
-              action:'loadfillmyviewattr'
-        }),
-      }).then(res=>{
-        // log(res)
-        let viewAttr = res.data.alertdata.filter(item=>{
-          return item.attrid == this.option.attrid
+        method: "post",
+        url: "/proxy/monitorRequest",
+        data: qs.stringify({
+          viewid: this.option.mixid,
+          dateint: new Date().getTime(), //当前时间戳
+          action: "loadfillmyviewattr"
         })
+      }).then(res => {
+        // log(res)
+        let viewAttr = res.data.alertdata.filter(item => {
+          return item.attrid == this.option.attrid;
+        });
         let obj = {
           attrid: this.option.attrid,
-          mixid : this.option.mixid,
+          mixid: this.option.mixid,
           owner: res.data.configdata.owner
-        }
-        viewAttr = viewAttr[0]?viewAttr[0]:{
-          attrid:-1,
-          maxalertid:-1,
-          maxcautionvalue:-1,
-          maxvalue:-1,
-          minalertid:-1,
-          mincautionvalue:-1,
-          minvalue:-1,
-          wavealertid:-1,
-          wavecautionvalue:-1,
-          wavemaxvalue:-1,
-          waveminvalue:-1
-        }
-        Object.assign(viewAttr,obj)
+        };
+        viewAttr = viewAttr[0]
+          ? viewAttr[0]
+          : {
+              attrid: -1,
+              maxalertid: -1,
+              maxcautionvalue: -1,
+              maxvalue: -1,
+              minalertid: -1,
+              mincautionvalue: -1,
+              minvalue: -1,
+              wavealertid: -1,
+              wavecautionvalue: -1,
+              wavemaxvalue: -1,
+              waveminvalue: -1
+            };
+        Object.assign(viewAttr, obj);
         // viewAttr.attrid = this.option.attrid
         // viewAttr.mixid = this.option.mixid
-        this.changeViewAttribute(viewAttr)
-      })
+        this.changeViewAttribute(viewAttr);
+      });
     },
     comparison(num1, num2) {
       num1 = Number(num1);
       num2 = Number(num2);
       // 计算变化率
-      let rate = Math.round((num1 - num2) / num2 * 10000) / 100 + "%";
+      let rate = Math.round(((num1 - num2) / num2) * 10000) / 100 + "%";
       if (num1 > num2) {
         return {
           color: "green",
@@ -258,15 +267,16 @@ export default {
       try {
         res = await axios(this.option.url);
         // res = await axios("https://api.myjson.com/bins/q8rni");
-        if(typeof(res.data) == 'string'){
-          this.error = true
+        if (typeof res.data == "string") {
+          this.error = true;
         }
       } catch (e) {
         res = {};
         this.error = true;
       }
+
       this.loading = false;
-      this.monitorData = res.data
+      this.monitorData = res.data;
 
       let array = []; // 存放当前时间的值
       res.data.data.forEach((value, num) => {
@@ -286,68 +296,95 @@ export default {
         compare: this.compare
       });
     },
-    linkTo(){
-        if(!this.option.link){
-          return
-        }
-        window.location.href = this.option.link
+    linkTo() {
+      if (!this.option.link) {
+        return;
+      }
+      window.location.href = this.option.link;
     },
-    downLoadSheet(rs){
-      let data = [{}]
+    downLoadSheet(rs) {
+      let data = [{}];
       for (let k in rs[0]) {
-        data[0][k] = k
+        data[0][k] = k;
       }
-      data = data.concat(rs)
-      this.downLoadExl(data, this.option.title)
+      data = data.concat(rs);
+      this.downLoadExl(data, this.option.title);
     },
-    downLoadExl(json,downName,type){ //导出到Excel
-      let keyMap = [] // 获取键
+    downLoadExl(json, downName, type) {
+      //导出到Excel
+      let keyMap = []; // 获取键
       for (let k in json[0]) {
-        keyMap.push(k)
+        keyMap.push(k);
       }
-      console.info('keyMap', keyMap, json)
-      let tmpdata = [] // 用来保存转换好的json
-      json.map((v, i) => keyMap.map((k, j) => Object.assign({}, {
-        v: v[k],
-        position: (j > 25 ? this.getCharCol(j) : String.fromCharCode(65 + j)) + (i + 1)
-      }))).reduce((prev, next) => prev.concat(next)).forEach(function (v) {
-        tmpdata[v.position] = {
-          v: v.v
-        }
-      })
-      let outputPos = Object.keys(tmpdata)  // 设置区域,比如表格从A1到D10
+      console.info("keyMap", keyMap, json);
+      let tmpdata = []; // 用来保存转换好的json
+      json
+        .map((v, i) =>
+          keyMap.map((k, j) =>
+            Object.assign(
+              {},
+              {
+                v: v[k],
+                position:
+                  (j > 25 ? this.getCharCol(j) : String.fromCharCode(65 + j)) +
+                  (i + 1)
+              }
+            )
+          )
+        )
+        .reduce((prev, next) => prev.concat(next))
+        .forEach(function(v) {
+          tmpdata[v.position] = {
+            v: v.v
+          };
+        });
+      let outputPos = Object.keys(tmpdata); // 设置区域,比如表格从A1到D10
       let tmpWB = {
-        SheetNames: ['mySheet'], // 保存的表标题
+        SheetNames: ["mySheet"], // 保存的表标题
         Sheets: {
-          'mySheet': Object.assign({},
+          mySheet: Object.assign(
+            {},
             tmpdata, // 内容
             {
-              '!ref': outputPos[0] + ':' + outputPos[outputPos.length - 1] // 设置填充区域
-            })
+              "!ref": outputPos[0] + ":" + outputPos[outputPos.length - 1] // 设置填充区域
+            }
+          )
         }
-      }
-      // log(tmpWB)
-      let tmpDown = new Blob([this.s2ab(XLSX.write(tmpWB,
-        {bookType: (type === undefined ? 'xlsx' : type), bookSST: false, type: 'binary'} // 这里的数据是用来定义导出的格式类型
-      ))], {
-        type: ''
-      })  // 创建二进制对象写入转换好的字节流
-      log(tmpDown)
-      var href = URL.createObjectURL(tmpDown)  // 创建对象超链接
-      this.outFile.download = downName + '.xlsx'  // 下载名称
-      this.outFile.href = href  // 绑定a标签
-      this.outFile.click()  // 模拟点击实现下载
-      setTimeout(function () {  // 延时释放
-        URL.revokeObjectURL(tmpDown) // 用URL.revokeObjectURL()来释放这个object URL
-      }, 100)
+      };
+      let tmpDown = new Blob(
+        [
+          this.s2ab(
+            XLSX.write(
+              tmpWB,
+              {
+                bookType: type === undefined ? "xlsx" : type,
+                bookSST: false,
+                type: "binary"
+              } // 这里的数据是用来定义导出的格式类型
+            )
+          )
+        ],
+        {
+          type: ""
+        }
+      ); // 创建二进制对象写入转换好的字节流
+      var href = URL.createObjectURL(tmpDown); // 创建对象超链接
+      this.outFile.download = downName + ".xlsx"; // 下载名称
+      this.outFile.href = href; // 绑定a标签
+      this.outFile.click(); // 模拟点击实现下载
+      setTimeout(function() {
+        // 延时释放
+        URL.revokeObjectURL(tmpDown); // 用URL.revokeObjectURL()来释放这个object URL
+      }, 100);
     },
-    s2ab: function (s) { // 字符串转字符流
-      var buf = new ArrayBuffer(s.length)
-      var view = new Uint8Array(buf)
+    s2ab: function(s) {
+      // 字符串转字符流
+      var buf = new ArrayBuffer(s.length);
+      var view = new Uint8Array(buf);
       for (var i = 0; i !== s.length; ++i) {
-        view[i] = s.charCodeAt(i) & 0xFF
+        view[i] = s.charCodeAt(i) & 0xff;
       }
-      return buf
+      return buf;
     },
     showChart(data) {
       let names = [];
@@ -355,8 +392,7 @@ export default {
         names.push(item.name.replace(/\d+\-0/, "").replace(/\-/, "月") + "日");
       });
       let chartData = this.handleAjaxData(data);
-      this.excelData = chartData
-      // log(chartData)
+      this.excelData = chartData;
       // document.innerHTML = chartData
       const ds = new DataSet();
       const dv = ds.createView().source(chartData);
@@ -380,7 +416,18 @@ export default {
       chart.tooltip({
         crosshairs: {
           type: "line"
+          //
         }
+        // containerTpl: `
+        //   <div class="g2-tooltipsf" style="background-color:rgba(0, 0, 0, 0.65)!important;color:rgb(255,255,255)!important;">
+        //     <p>{time}</p>
+        //     <ul class="g2-tooltip-list" ></ul>
+        //   </div>
+        // `,
+        // itemTpl: `<li data-index={index}><span style="background-color:{color};width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:8px;"></span>{name}: {value}</li>`
+        // style: {
+        //   fill:'black',
+        // }
       });
       chart.axis("value", {
         label: {
@@ -429,10 +476,11 @@ export default {
         this.current = item[0].value;
         this.time = item[1].title;
       });
-      const brush = new Brush({  //拖拽放大
-        canvas: chart.get('canvas'),
+      const brush = new Brush({
+        //拖拽放大
+        canvas: chart.get("canvas"),
         chart,
-        type: 'X',
+        type: "X",
         onBrushstart() {
           chart.hideTooltip();
         },
@@ -440,19 +488,25 @@ export default {
           chart.hideTooltip();
         }
       });
-      chart.on('plotdblclick', () => {
-        chart.get('options').filters = {};
+      chart.on("plotdblclick", () => {
+        chart.get("options").filters = {};
         chart.repaint();
       });
+      //设置tooltip的背景与字体颜色
+      let tooltip = document
+        .querySelector("#" + this.id)
+        .querySelector(".g2-tooltip");
+      tooltip.style.backgroundColor = "rgba(0, 0, 0, 0.65)";
+      tooltip.style.color = "rgb(255,255,255)";
     }
   },
   created() {
     this.id = randomString(4);
-    this.compareInit()
-    this.$nextTick(()=>{
-      this.outFile = this.$refs.downLoadLink
+    this.compareInit();
+    this.$nextTick(() => {
+      this.outFile = this.$refs.downLoadLink;
       this.refresh();
-    })
+    });
   }
 };
 </script>
@@ -472,7 +526,7 @@ export default {
   max-height: 433px;
   overflow: hidden;
   position: relative;
-  .ivu-icon-arrow-expand{
+  .ivu-icon-arrow-expand {
     cursor: pointer;
   }
   .error {
@@ -489,14 +543,17 @@ export default {
       font-size: 14px;
       @include center();
     }
-    .refresh{
+    .refresh {
       cursor: pointer;
       position: absolute;
       left: 50%;
       bottom: 20%;
-      transform: translate(-50%,0);
+      transform: translate(-50%, 0);
       font-size: 28px;
     }
+  }
+  div.g2-tooltip {
+    background-color: rgba(0, 0, 0, 0.65) !important;
   }
 }
 
@@ -531,14 +588,14 @@ export default {
     padding: 0 20px 1px 45px;
     background: #fff;
   }
-  .ivu-icon-arrow-expand {
-    font-size: 18px;
-    color: rgb(43, 133, 228);
-    float: left;
-    position: relative;
-    left: 2px;
-    line-height: 50px;
-  }
+  // .ivu-icon-arrow-expand {
+  //   font-size: 18px;
+  //   color: rgb(43, 133, 228);
+  //   float: left;
+  //   position: relative;
+  //   left: 2px;
+  //   line-height: 50px;
+  // }
   .ivu-icon-close-round {
     font-size: 18px;
     float: right;
@@ -550,21 +607,25 @@ export default {
   float: left;
   border: none;
   font-size: 18px;
-  position: relative;
-  margin-left: 2px;
-  top: 7px;
+  text-align: center;
+  cursor: pointer;
+  width: 32px;
+  height: 44px;
   .ivu-icon {
     color: rgb(43, 133, 228);
-  }
-  .Tooltip__popper is-light {
-    background-color: rgb(255, 231, 147);
+    @include center();
   }
 }
-.el-button.right-top{
-    position: absolute;
-    top:8px;
-    right: -12px;
-  }
+.ivu-tooltip-popper {
+  position: absolute;
+  left: -50%;
+  background: #303133;
+}
+.el-button.right-top {
+  position: absolute;
+  // top:6px;
+  right: 0;
+}
 
 .comparison {
   overflow: hidden;
@@ -582,6 +643,7 @@ export default {
     float: left;
   }
 }
+
 .highcharts-root {
   max-height: 320px !important;
 }

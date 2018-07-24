@@ -3,8 +3,9 @@
         <!-- <Row>
             <Input type="text" size="small" style="width: 150px" placeholder="请输入用户ID"></Input>
         </Row> -->
-        <Row :gutter="16" style="margin: 8px 0;">
-            <Col v-for="(value,key,index) in values" :key="'setting'+index" span="12">
+        <Row :gutter="16" style="margin: 0 20px;">
+            <Col v-for="(value,key,index) in values" :key="'setting'+index" span="12"
+                 style="margin: 8px 0;">
                 <span  @click="chose(key)">
                     <Checkbox v-model="value.checked"></Checkbox>
                 </span>
@@ -44,6 +45,7 @@ const log = console.log.bind(this);
 // const diff = function (json) {
 //
 // }
+
 export default {
   name: "viewAttributeSetting",
   components: {
@@ -73,7 +75,7 @@ export default {
           cautionChecked: false
         },
         wave: {
-          title: "wave波动值(%)",
+          title: "波动值(%)",
           wavevalue: "",
           wavecautionvalue: "",
           checked: false,
@@ -108,16 +110,16 @@ export default {
           "wavealertentity.cautionvalue": ""
         }
       },
-      completeShow:false,
-      completeWord:'',  //显示提交结果的文字
-      result:{
-        success:{
-          color:'rgb(25,190,107)',
-          word:'配置修改成功!'
+      completeShow: false,
+      completeWord: "", //显示提交结果的文字
+      result: {
+        success: {
+          color: "rgb(25,190,107)",
+          word: "配置修改成功!"
         },
-        fail:{
-          color: 'rgb(237,63,20)',
-          word: '修改失败,请重试'
+        fail: {
+          color: "rgb(237,63,20)",
+          word: "修改失败,请重试"
         }
       }
     };
@@ -134,7 +136,7 @@ export default {
         // 根据传入的参数来设置表单
         // log(n)
         let obj = {};
-        Object.keys(this.values).forEach(key => { 
+        Object.keys(this.values).forEach(key => {
           // key:max,min,wave
           obj[key] = {};
           Object.keys(n).forEach(kk => {
@@ -183,7 +185,7 @@ export default {
           this.settingParams[key][key + "alertentity.attrid"] = n.attrid;
         }
       },
-      immediate: true,
+      immediate: true
     }
   },
   methods: {
@@ -239,12 +241,19 @@ export default {
         method: "post",
         url: "/proxy/monitorRequest",
         data: qs.stringify({ ...params })
-      }).then(res => {
-        // log(res);
-        this.completeWord = res.data.code==0?this.result['success']:this.result['fail']
-        this.completeShow = true
-        this.$emit('commit')
-      });
+      })
+        .then(res => {
+          // log(res);
+          this.completeWord =
+            res.data.code == 0 ? this.result["success"] : this.result["fail"];
+          log(this.completeWord);
+          this.completeShow = true;
+          this.$emit("commit");
+        })
+        .catch(err => {
+          this.completeWord = this.result["fail"];
+          this.completeShow = true;
+        });
     }
   }
 };

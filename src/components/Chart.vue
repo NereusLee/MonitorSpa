@@ -14,7 +14,7 @@
 </template>
 <script>
 // import Highcharts from 'highcharts'
-import {Icon} from 'iview'
+import { Icon } from "iview";
 export default {
   // 验证类型
   props: {
@@ -31,16 +31,16 @@ export default {
   components: {
     Icon
   },
-  data () {
+  data() {
     return {
-      title: ''
-    }
+      title: ""
+    };
   },
   watch: {
-    option (n) {
-      this.title = this.option.title
+    option(n) {
+      this.title = this.option.title;
       // this.$nextTick(()=>{
-      Highcharts.chart(this.id, this.option.option)
+      Highcharts.chart(this.id, this.option.option);
       // })
     }
   },
@@ -48,56 +48,56 @@ export default {
   //     // console.log(typeof(this.option.series[0]['data'][0]))
   //     Highcharts.chart(this.id, this.option)
   // },
-  mounted () {
+  mounted() {
     // console.log(this.id)
-    this.title = this.option.title
+    this.title = this.option.title;
     this.$nextTick(() => {
-      Highcharts.chart(this.id, this.option.option)
-    })
+      Highcharts.chart(this.id, this.option.option);
+    });
   }
-}
+};
 </script>
 
 <style lang="scss" scoped>
-  .chart-body{
-    width: 90%;
-    /*margin: auto;*/
-    max-width: 600px;
-    /*height: 420px;*/
+.chart-body {
+  width: 90%;
+  /*margin: auto;*/
+  max-width: 600px;
+  /*height: 420px;*/
+}
+.chart-root {
+  height: 420px;
+}
+.x-bar {
+  border: none;
+}
+.chart-head {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  height: 50px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 600;
+  overflow: hidden;
+  align-items: center;
+  .headTitle {
+    display: inline-block;
+    line-height: 50px;
   }
-  .chart-root{
-    height: 420px;
+}
+.el-button {
+  float: left;
+  border: none;
+  font-size: 18px;
+  position: relative;
+  top: 8px;
+  left: 5px;
+  .ivu-icon {
+    color: rgb(43, 133, 228);
   }
-  .x-bar {
-    border: none;
+  .el-tooltip__popper is-light {
+    background-color: rgb(255, 231, 147);
   }
-  .chart-head {
-    position: relative;
-    margin: 0;
-    padding: 0;
-    height: 50px;
-    text-align: center;
-    font-size: 15px;
-    font-weight: 600;
-    overflow: hidden;
-    align-items:center;
-    .headTitle{
-      display: inline-block;
-      line-height: 50px;
-    }
-  }
-  .el-button {
-    float: left;
-    border: none;
-    font-size: 18px;
-    position: relative;
-    top: 8px;
-    left: 5px;
-    .ivu-icon {
-      color: rgb(43,133,228);
-    }
-    .el-tooltip__popper is-light {
-      background-color: rgb(255, 231, 147);
-    }
-  }
+}
 </style>

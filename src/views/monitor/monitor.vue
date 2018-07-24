@@ -15,7 +15,7 @@
         :loading="modalLoading"
         >
           <div class="big-chart">
-              <view-attribute-setting v-if="viewAttr" ref="va" 
+              <view-attribute-setting v-if="viewAttr" ref="va"
               v-on:commit= "asyncClose"></view-attribute-setting>
             </div>
         </Modal>
@@ -239,9 +239,10 @@ export default {
       this.list.forEach(item => {
         array.push({
           title: item.title.split(" ")[2],
-          url: `/accesslayer/NewsMonitorAccesslayer/GetThreeDailyData?type=1&mixid=${
+          url: `http://test.lg.webdev.com/accesslayer/NewsMonitorAccesslayer/GetThreeDailyData?type=1&mixid=${
             item.mixid
           }&attrid=${item.attrid}`,
+          // url:'https://api.myjson.com/bins/1b9x8a',
           describe: `视图ID为${item.mixid},属性ID为${
             item.attrid
           } \n  双击图表恢复原尺寸`,
@@ -255,15 +256,13 @@ export default {
     accessList() {
       let ids = this.$route.fullPath == "/kuaibao" ? this.kuaibao : this.news;
       // let host = window.location.host;
-      let baseUrl = `/accesslayer/${
-        ids.accessQualityList.queryMethod
-      }/`;
+      let baseUrl = `/accesslayer/${ids.accessQualityList.queryMethod}/`;
       let type = this.$route.fullPath == "/kuaibao" ? "cnewscode" : "inewscode";
       let arr = [];
       ids.accessQualityList.metric.forEach(item => {
         arr.push({
           title: "接入层整体" + this.CName[item],
-          url: `/accesslayer/${
+          url: `http://yd.lg.webdev.com/accesslayer/${
             ids.accessQualityList.queryMethod
           }/getConnTrend?metric=${item}&etime=23:59`,
           link: baseUrl + type + `?metric=${item}`,
@@ -294,12 +293,12 @@ export default {
             chartName =
               this.appQualityName[item] + " " + this.appQualityName[it.t_type];
           }
-          let url2 = `/accesslayer/${page}/cnews${
-            it.cnews
-          }/?platform=${chartName.split(" ")[0].match(/[a-z]+/)[0]}`;
+          let url2 = `/accesslayer/${page}/cnews${it.cnews}/?platform=${
+            chartName.split(" ")[0].match(/[a-z]+/)[0]
+          }`;
           quality.push({
             title: chartName + "总体耗时(95分位)",
-            url: `/appnews/News99_95/GetThreedailyCmpData?appid=${item}&t_type=${
+            url: `http://yd.lg.webdev.com/appnews/News99_95/GetThreedailyCmpData?appid=${item}&t_type=${
               it.t_type
             }&uri=${this.appUri[chartName]}&code=1000&sdate=${this.GetDateStr(
               0
@@ -438,6 +437,10 @@ body {
         width: 0.1px;
         vertical-align: middle;
       }
+    }
+    .chart-body .g2-tooltip {
+      background-color: rgba(0, 0, 0, 0.65);
+      color: rgb(255, 255, 255);
     }
   }
 }

@@ -1,10 +1,10 @@
-
 module.exports = {
   runtimeCompiler: true,
-  lintOnSave:true,
+  lintOnSave: true,
   assetsDir: "static",
   // mode:'production',
-  pages:{
+  productionSourceMap: false,
+  pages: {
     // app: {
     //   entry: "src/views/app/main.js",
     //   template: "public/index.html",
@@ -12,26 +12,24 @@ module.exports = {
     //   title: "Monitor Page"
     // },
     monitor: {
-        entry: "src/views/monitor/main.js",
-        template: "public/index.html",
-        filename: "monitor.html",
-        title: "Monitor Page"
-      },
-      pvuv: {
-        entry: "src/views/pvuv/main.js",
-        template: "public/index.html",
-        filename: "pvuv.html",
-        title: "Pvuv"
-      }
+      entry: "src/views/monitor/main.js",
+      template: "public/index.html",
+      filename: "monitor.html",
+      title: "Monitor Page"
+    },
+    pvuv: {
+      entry: "src/views/pvuv/main.js",
+      template: "public/index.html",
+      filename: "pvuv.html",
+      title: "Pvuv"
+    }
   },
   configureWebpack: {
     output: {
-      libraryExport: 'default'
+      libraryExport: "default"
     }
   }
-  
-}
-
+};
 
 // //模拟数据
 // module.exports = {

@@ -9,25 +9,23 @@
 
 <script>
 export default {
-  name: 'checkbox',
-  components: {
-  },
-  data () {
+  name: "checkbox",
+  components: {},
+  data() {
     return {
-      checkboxGroup1: '深圳',
-      checkboxGroup2: '深圳',
-      cities: ['上海', '北京', '广州', '深圳'],
+      checkboxGroup1: "深圳",
+      checkboxGroup2: "深圳",
+      cities: ["上海", "北京", "广州", "深圳"],
       checked3: true
-    }
+    };
   },
   methods: {
-    show (n) {
-      console.log(this.$router)
+    show(n) {
+      console.log(this.$router);
     }
   }
-}
+};
 </script>
 
 <style scoped>
-
 </style>
