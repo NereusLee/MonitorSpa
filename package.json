@@ -6,7 +6,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "bt" :"vue-cli-service build --target lib --name pvuv src/views/pvuv/main.js",
-    "lint": "vue-cli-service lint --fix"
+    "lint": "vue-cli-service lint"
   },
   "dependencies": {
     "@antv/data-set": "^0.8.9",
@@ -17,7 +17,6 @@
     "highcharts": "^6.1.1",
     "iview": "^2.14.0-rc.2",
     "jquery": "^3.3.1",
-    "live-server": "^1.2.0",
     "npm": "^6.1.0",
     "popper.js": "^1.14.3",
     "px2rem-loader": "^0.1.9",

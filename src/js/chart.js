@@ -1,5 +1,5 @@
-import $ from "jquery";
-import Highcharts from "highcharts";
+// import $ from "jquery";
+// import Highcharts from "highcharts";
 
 function comparison(num1, num2) {
   let rate = Math.round(((num1 - num2) / num2) * 10000) / 100 + "%";
