@@ -13,7 +13,7 @@
   </div>
 </template>
 <script>
-// import Highcharts from 'highcharts'
+import Highcharts from 'highcharts'
 import {Icon} from 'iview'
 export default {
   // 验证类型
@@ -58,7 +58,7 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
   .chart-body{
     width: 90%;
     /*margin: auto;*/

@@ -19,7 +19,7 @@ function GetDateStr (AddDayCount) {
 }
 
 function randomString (len) { // 随机生成字符串
-  len = len || 32
+  len = len || 32  
   var $chars = 'abcdefhijkmnprstwxyz2345678' /** **默认去掉了容易混淆的字符oOLl,9gq,Vv,Uu,I1****/
   var maxPos = $chars.length
   var pwd = ''
@@ -87,8 +87,8 @@ export default new Vuex.Store({
       }
       // console.log(arg.date[0])
       let url = `/accesslayer/NewsdailyPVUV/GetChanelPvUvData?sdate=${arg.date[0]}&edate=${arg.date[1]}&channels=${arg.channel}`
-      let data = await axios(url)
-      // let data = await axios('https://api.myjson.com/bins/150pce')
+      // let data = await axios(url)
+      let data = await axios('https://api.myjson.com/bins/150pce')
       context.commit('changeChannelsData', data)
     }
   },
